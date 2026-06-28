@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0">
+
+    <title>ESP32 RC Car</title>
+
+    <link rel="stylesheet" href="style.css">
+
+</head>
+
+<body>
+
+    <div class="background">
+        <div class="blur blur1"></div>
+        <div class="blur blur2"></div>
+    </div>
+
+    <main class="dashboard">
+
+        <!-- Header -->
+
+        <header class="header">
+
+            <div>
+
+                <h1>ESP32 RC CAR</h1>
+
+                <p>HTTP Remote Controller</p>
+
+            </div>
+
+            <div class="status">
+
+                <span class="dot"></span>
+
+                Connected
+
+            </div>
+
+        </header>
+
+
+
+        <!-- Information Cards -->
+
+        <section class="cards">
+
+            <div class="card">
+
+                <div class="cardTitle">
+
+                    Battery
+
+                </div>
+
+                <div class="battery">
+
+                    <div class="batteryIcon">
+
+                        <div
+                            id="batteryLevel"
+                            class="batteryFill">
+
+                        </div>
+
+                    </div>
+
+                    <span id="batteryPercent">
+
+                        100%
+
+                    </span>
+
+                </div>
+
+            </div>
+
+
+
+            <div class="card">
+
+                <div class="cardTitle">
+
+                    WiFi
+
+                </div>
+
+                <div class="wifi">
+
+                    📶 RC_CAR
+
+                </div>
+
+                <small id="ip">
+
+                    192.168.4.1
+
+                </small>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- D Pad -->
+
+        <section class="controller">
+
+            <button
+                id="forward"
+                class="direction up">
+                ▲
+            </button>
+            <div class="middle">
+                <button
+                    id="left"
+                    class="direction">
+                    ◀
+                </button>
+                <button
+                    id="stop"
+                    class="stop">
+                    ■
+                </button>
+                <button
+                    id="right"
+                    class="direction">
+                    ▶
+                </button>
+            </div>
+            <button
+                id="backward"
+                class="direction down">
+                ▼
+            </button>
+        </section>
+        <!-- Speed -->
+        <section class="speedCard">
+            <div class="speedHeader">
+                <span>
+                    Speed
+                </span>
+                <span id="speedText">
+                    70%
+                </span>
+            </div>
+            <input
+                type="range"
+                min="0"
+                max="255"
+                value="180"
+                id="speedSlider">
+        </section>
+        <!-- Features -->
+        <section class="features">
+            <button id="lightButton">
+                💡 Headlights
+            </button>
+            <button id="hornButton">
+                📢 Horn
+            </button>
+        </section>
+        <!-- Footer -->
+        <footer>
+            <div>
+                Firmware v1.0
+            </div>
+            <div>
+                ESP32 HTTP Server
+            </div>
+        </footer>
+    </main>
+    <script src="script.js"></script>
+</body>
+</html>
