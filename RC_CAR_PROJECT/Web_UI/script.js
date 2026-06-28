@@ -234,53 +234,30 @@ function updateBattery(percent){
     else{
 
         batteryLevel.classList.add("battery-red");
-
     }
-
 }
-
-
 // ==========================
 // STATUS
 // ==========================
 
 function updateStatus(connected){
-
     if(connected){
-
         status.classList.remove("disconnected");
-
         status.classList.add("connected");
-
         status.innerHTML=`
-
         <span class="dot"></span>
-
         Connected
-
         `;
-
     }
-
     else{
-
         status.classList.remove("connected");
-
         status.classList.add("disconnected");
-
         status.innerHTML=`
-
         <span class="dot"></span>
-
         Offline
-
         `;
-
     }
-
 }
-
-
 // ==========================
 // ESP32 STATUS
 // ==========================
@@ -288,33 +265,18 @@ function updateStatus(connected){
 async function refresh(){
 
     try{
-
         const response=await fetch(BASE_URL+"/status");
-
         const data=await response.json();
-
         updateBattery(data.battery);
-
         updateStatus(true);
-
     }
-
     catch{
-
         updateStatus(false);
-
     }
-
 }
-
-
 setInterval(refresh,1000);
-
-
 // ==========================
 // INITIALIZE
 // ==========================
-
 updateBattery(100);
-
 updateStatus(true);
