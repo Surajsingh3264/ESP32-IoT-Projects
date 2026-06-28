@@ -261,9 +261,7 @@ function updateStatus(connected){
 // ==========================
 // ESP32 STATUS
 // ==========================
-
 async function refresh(){
-
     try{
         const response=await fetch(BASE_URL+"/status");
         const data=await response.json();
@@ -274,6 +272,7 @@ async function refresh(){
         updateStatus(false);
     }
 }
+refresh()
 setInterval(refresh,1000);
 // ==========================
 // INITIALIZE

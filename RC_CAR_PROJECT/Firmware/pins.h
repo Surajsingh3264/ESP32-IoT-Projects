@@ -66,7 +66,5 @@ Hardware Pin Configuration
 #define PWM_FREQ 1000          // 1 kHz
 #define PWM_RESOLUTION 8       // 8-bit (0-255)
 
-#define PWM_CHANNEL_A 0
-#define PWM_CHANNEL_B 1
 
 #endif
