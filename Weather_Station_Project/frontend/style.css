@@ -1,0 +1,404 @@
+/* ================================
+   RESET
+================================ */
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+:root{
+
+    --background:#F5F5F7;
+    --surface:#FFFFFF;
+
+    --border:#E5E7EB;
+
+    --text:#1D1D1F;
+    --secondary:#6E6E73;
+
+    --primary:#0071E3;
+
+    --success:#34C759;
+    --warning:#FF9F0A;
+    --danger:#FF3B30;
+
+    --radius:20px;
+
+    --shadow:
+        0 8px 25px rgba(0,0,0,.05);
+
+    --transition:.25s ease;
+
+}
+
+body{
+
+    background:var(--background);
+
+    color:var(--text);
+
+    font-family:
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    sans-serif;
+
+    line-height:1.5;
+
+}
+
+.container{
+
+    width:min(1200px,94%);
+
+    margin:auto;
+
+    padding:35px 0 50px;
+
+}
+
+/* ================================
+   HEADER
+================================ */
+
+.header{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    margin-bottom:35px;
+
+}
+
+.logo h1{
+
+    font-size:2rem;
+
+    font-weight:700;
+
+}
+
+.logo p{
+
+    color:var(--secondary);
+
+    margin-top:4px;
+
+    font-size:.95rem;
+
+}
+
+.status{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:10px;
+
+    background:white;
+
+    border:1px solid var(--border);
+
+    padding:10px 18px;
+
+    border-radius:50px;
+
+}
+
+.status-dot{
+
+    width:10px;
+
+    height:10px;
+
+    border-radius:50%;
+
+    background:var(--success);
+
+}
+
+/* ================================
+   HERO
+================================ */
+
+.hero{
+
+    background:var(--surface);
+
+    border-radius:28px;
+
+    border:1px solid var(--border);
+
+    box-shadow:var(--shadow);
+
+    padding:45px;
+
+    margin-bottom:35px;
+
+}
+
+.hero-title{
+
+    color:var(--secondary);
+
+    font-size:1rem;
+
+}
+
+.hero h2{
+
+    font-size:4.5rem;
+
+    font-weight:700;
+
+    margin:10px 0;
+
+}
+
+.hero p:last-child{
+
+    color:var(--secondary);
+
+    font-size:1rem;
+
+}
+/* ================================
+   SENSOR GRID
+================================ */
+
+.sensor-grid{
+
+    display:grid;
+
+    grid-template-columns:repeat(2,1fr);
+
+    gap:18px;
+
+}
+
+/* ================================
+   CARD
+================================ */
+
+.card{
+
+    background:var(--surface);
+
+    border-radius:20px;
+
+    border:1px solid var(--border);
+
+    padding:24px;
+
+    box-shadow:var(--shadow);
+
+    transition:var(--transition);
+
+}
+
+.card:hover{
+
+    transform:translateY(-4px);
+
+    border-color:var(--primary);
+
+}
+
+.card-header{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:12px;
+
+    margin-bottom:18px;
+
+}
+
+.icon{
+
+    font-size:1.3rem;
+
+}
+
+.card h3{
+
+    font-size:1rem;
+
+    color:var(--secondary);
+
+    font-weight:600;
+
+}
+
+.value{
+
+    font-size:2.2rem;
+
+    font-weight:700;
+
+    color:var(--text);
+
+}
+
+/* ================================
+   FOOTER
+================================ */
+
+.footer{
+
+    margin-top:35px;
+
+    display:flex;
+
+    justify-content:space-between;
+
+    gap:20px;
+
+    background:white;
+
+    border-radius:18px;
+
+    border:1px solid var(--border);
+
+    padding:20px 25px;
+
+    color:var(--secondary);
+
+}
+
+/* ================================
+   RESPONSIVE
+================================ */
+
+@media(max-width:768px){
+
+.header{
+
+    flex-direction:column;
+
+    align-items:flex-start;
+
+    gap:18px;
+
+}
+
+.hero{
+
+    padding:30px;
+
+}
+
+.hero h2{
+
+    font-size:3.2rem;
+
+}
+
+.footer{
+
+    flex-direction:column;
+
+}
+
+}
+
+@media(max-width:500px){
+
+.logo h1{
+
+    font-size:1.6rem;
+
+}
+
+.hero h2{
+
+    font-size:2.8rem;
+
+}
+
+.value{
+
+    font-size:1.8rem;
+
+}
+
+}
+
+/* ================================
+   SMALL ANIMATIONS
+================================ */
+
+.card{
+
+    transition:
+        transform .2s ease,
+        border-color .2s ease,
+        box-shadow .2s ease;
+
+}
+
+.status-dot{
+
+    animation:pulse 2s infinite;
+
+}
+
+@keyframes pulse{
+
+0%{
+
+transform:scale(1);
+
+opacity:1;
+
+}
+
+50%{
+
+transform:scale(1.25);
+
+opacity:.7;
+
+}
+
+100%{
+
+transform:scale(1);
+
+opacity:1;
+
+}
+
+}
+/* Tablet */
+
+@media(min-width:768px){
+
+.sensor-grid{
+
+    grid-template-columns:repeat(3,1fr);
+
+}
+
+}
+
+/* Large Desktop */
+
+@media(min-width:1200px){
+
+.sensor-grid{
+
+    grid-template-columns:repeat(3,1fr);
+
+}
+
+}

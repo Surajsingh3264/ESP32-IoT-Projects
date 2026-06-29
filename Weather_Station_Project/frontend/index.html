@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Weather Monitoring Center</title>
+
+    <link rel="stylesheet"
+          href="style.css">
+
+    <script defer
+            src="script.js"></script>
+
+</head>
+
+<body>
+
+    <div class="container">
+
+        <header class="header">
+
+            <div class="logo">
+
+                <h1>Weather Monitoring Center</h1>
+
+                <p>ESP32 IoT Dashboard</p>
+
+            </div>
+
+            <div class="status">
+
+                <div class="status-dot"></div>
+
+                <span>Online</span>
+
+            </div>
+
+        </header>
+
+
+
+        <section class="hero">
+
+            <div class="hero-content">
+
+                <p class="hero-title">
+
+                    Current Temperature
+
+                </p>
+
+                <h2 id="temperature">
+
+                    28.5°C
+
+                </h2>
+
+                <p id="weatherSummary">
+
+                    Good Air Quality • Comfortable Humidity
+
+                </p>
+
+            </div>
+
+        </section>
+
+
+
+        <section class="sensor-grid">
+
+            <div class="card">
+
+                <div class="card-header">
+
+                    <span class="icon">🌡</span>
+
+                    <h3>Temperature</h3>
+
+                </div>
+
+                <p class="value"
+
+                   id="temp">
+
+                    28.5°C
+
+                </p>
+
+            </div>
+
+
+
+            <div class="card">
+
+                <div class="card-header">
+
+                    <span class="icon">💧</span>
+
+                    <h3>Humidity</h3>
+
+                </div>
+
+                <p class="value"
+
+                   id="humidity">
+
+                    67%
+
+                </p>
+
+            </div>
+
+
+
+            <div class="card">
+
+                <div class="card-header">
+
+                    <span class="icon">🌤</span>
+
+                    <h3>Pressure</h3>
+
+                </div>
+
+                <p class="value"
+
+                   id="pressure">
+
+                    1013 hPa
+
+                </p>
+
+            </div>
+
+
+
+            <div class="card">
+
+                <div class="card-header">
+
+                    <span class="icon">⛰</span>
+
+                    <h3>Altitude</h3>
+
+                </div>
+
+                <p class="value"
+
+                   id="altitude">
+
+                    228 m
+
+                </p>
+
+            </div>
+
+
+
+            <div class="card">
+
+                <div class="card-header">
+
+                    <span class="icon">☀</span>
+
+                    <h3>Light</h3>
+
+                </div>
+
+                <p class="value"
+
+                   id="light">
+
+                    542 lux
+
+                </p>
+
+            </div>
+
+
+
+            <div class="card">
+
+                <div class="card-header">
+
+                    <span class="icon">🌫</span>
+
+                    <h3>Air Quality</h3>
+
+                </div>
+
+                <p class="value"
+
+                   id="air">
+
+                    Good
+
+                </p>
+
+            </div>
+
+        </section>
+
+
+
+        <footer class="footer">
+
+            <div>
+
+                Wi-Fi :
+
+                <span id="wifi">
+
+                    Connected
+
+                </span>
+
+            </div>
+
+            <div>
+
+                Last Updated :
+
+                <span id="lastUpdate">
+
+                    12:45:10
+
+                </span>
+
+            </div>
+
+        </footer>
+
+    </div>
+
+</body>
+
+</html>
