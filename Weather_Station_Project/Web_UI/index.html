@@ -1,243 +1,543 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ESP32 Weather Station</title>
 
-    <meta charset="UTF-8">
+<style>
 
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:system-ui,-apple-system,"Segoe UI",sans-serif;
+}
 
-    <title>Weather Monitoring Center</title>
+:root{
+    --bg:#f4f7fb;
+    --card:#ffffff;
+    --text:#0f172a;
+    --sub:#64748b;
+    --border:#e2e8f0;
+    --primary:#2563eb;
+    --success:#22c55e;
+    --warning:#f59e0b;
+    --danger:#ef4444;
+    --shadow:0 8px 24px rgba(15,23,42,.08);
+}
 
-    <link rel="stylesheet"
-          href="style.css">
+body{
+    background:var(--bg);
+    color:var(--text);
+    padding:16px;
+}
 
-    <script defer
-            src="script.js"></script>
+.container{
+    max-width:460px;
+    margin:auto;
+}
 
+header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:14px;
+}
+
+.title h1{
+    font-size:1.45rem;
+    font-weight:700;
+}
+
+.title p{
+    color:var(--sub);
+    font-size:.85rem;
+    margin-top:3px;
+}
+
+.headerButtons{
+    display:flex;
+    gap:10px;
+}
+
+.headerButtons button{
+    width:42px;
+    height:42px;
+    border:none;
+    border-radius:14px;
+    background:var(--card);
+    box-shadow:var(--shadow);
+    cursor:pointer;
+    font-size:1rem;
+    transition:.25s;
+}
+
+.headerButtons button:hover{
+    transform:translateY(-2px);
+}
+
+.statusBar{
+    background:var(--card);
+    border-radius:18px;
+    box-shadow:var(--shadow);
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:12px 14px;
+    margin-bottom:14px;
+}
+
+.status{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    font-size:.85rem;
+    font-weight:600;
+}
+
+.onlineDot{
+    width:10px;
+    height:10px;
+    border-radius:50%;
+    background:var(--success);
+    animation:pulse 2s infinite;
+}
+
+.grid{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:14px;
+}
+
+.card{
+    background:var(--card);
+    border-radius:20px;
+    box-shadow:var(--shadow);
+    padding:18px;
+    min-height:150px;
+    display:flex;
+    flex-direction:column;
+    justify-content:space-between;
+    transition:.25s;
+}
+
+.card:hover{
+    transform:translateY(-3px);
+}
+
+.icon{
+    width:42px;
+    height:42px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:#f8fafc;
+    border-radius:14px;
+}
+
+.icon svg{
+    width:24px;
+    height:24px;
+}
+
+.value{
+    font-size:2rem;
+    font-weight:700;
+    line-height:1;
+}
+
+.value span{
+    font-size:.95rem;
+    color:var(--primary);
+    margin-left:3px;
+    font-weight:600;
+}
+
+.label{
+    color:var(--sub);
+    font-size:.9rem;
+    font-weight:500;
+}
+
+.aqiCard{
+    grid-column:1/3;
+    background:var(--card);
+    border-radius:22px;
+    box-shadow:var(--shadow);
+    padding:22px;
+}
+
+.aqiTitle{
+    color:var(--sub);
+    font-size:.95rem;
+    font-weight:600;
+}
+
+.aqiValue{
+    font-size:3.2rem;
+    font-weight:700;
+    margin-top:8px;
+}
+
+.aqiStatus{
+    color:var(--success);
+    font-size:1.15rem;
+    font-weight:700;
+    margin-top:4px;
+}
+
+.aqiBar{
+    margin:18px 0;
+    height:10px;
+    background:#e2e8f0;
+    border-radius:30px;
+    overflow:hidden;
+}
+
+.aqiFill{
+    width:72%;
+    height:100%;
+    background:linear-gradient(90deg,#22c55e,#84cc16,#facc15,#fb923c,#ef4444);
+    border-radius:30px;
+}
+
+.aqiText{
+    color:var(--sub);
+    font-size:.9rem;
+}
+
+.smallCard{
+    min-height:100px;
+}
+
+.smallTitle{
+    color:var(--sub);
+    font-size:.85rem;
+}
+
+.systemState{
+    font-size:1.15rem;
+    font-weight:700;
+}
+
+.systemState.normal{
+    color:var(--success);
+}
+
+.systemState.warning{
+    color:var(--warning);
+}
+
+.systemState.danger{
+    color:var(--danger);
+}
+
+.alarmState{
+    font-size:1.15rem;
+    font-weight:700;
+    color:var(--danger);
+}
+
+.bottomBar{
+    margin-top:14px;
+    background:var(--card);
+    border-radius:18px;
+    box-shadow:var(--shadow);
+    padding:14px 18px;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    font-size:.9rem;
+    font-weight:600;
+    color:var(--sub);
+}
+
+@keyframes pulse{
+    0%{opacity:1;}
+    50%{opacity:.3;}
+    100%{opacity:1;}
+}
+
+@media(max-width:370px){
+
+.grid{
+    gap:10px;
+}
+
+.card{
+    padding:14px;
+    min-height:135px;
+}
+
+.value{
+    font-size:1.7rem;
+}
+
+.headerButtons button{
+    width:38px;
+    height:38px;
+}
+
+}
+</style>
 </head>
+<script>
+
+const values={
+temperature:28.4,
+humidity:64,
+pressure:1008,
+light:512,
+aqi:84,
+clients:1
+};
+
+function updateUI(){
+
+document.getElementById("temperature").innerHTML=values.temperature+"<span>°C</span>";
+document.getElementById("humidity").innerHTML=values.humidity+"<span>%</span>";
+document.getElementById("pressure").innerHTML=values.pressure+"<span>hPa</span>";
+document.getElementById("light").innerHTML=values.light+"<span>Lux</span>";
+document.getElementById("aqi").innerText=values.aqi;
+document.getElementById("clients").innerText=values.clients;
+
+let status=document.getElementById("aqiStatus");
+let fill=document.querySelector(".aqiFill");
+let system=document.querySelector(".systemState");
+
+if(values.aqi<=50){
+status.innerText="GOOD";
+status.style.color="#22c55e";
+fill.style.width="20%";
+system.innerHTML="🟢 Normal";
+system.style.color="#22c55e";
+}
+
+else if(values.aqi<=100){
+status.innerText="MODERATE";
+status.style.color="#f59e0b";
+fill.style.width="45%";
+system.innerHTML="🟡 Warning";
+system.style.color="#f59e0b";
+}
+
+else{
+status.innerText="POOR";
+status.style.color="#ef4444";
+fill.style.width="80%";
+system.innerHTML="🔴 Critical";
+system.style.color="#ef4444";
+}
+
+document.getElementById("updated").innerText=
+new Date().toLocaleTimeString();
+
+}
+
+updateUI();
+
+setInterval(updateUI,1000);
+
+</script>
+<body>
 
 <body>
 
-    <div class="container">
+<div class="container">
 
-        <header class="header">
+<header>
 
-            <div class="logo">
+<div class="title">
+<h1>Smart Environment Monitor</h1>
+<p>ESP32-WROOM-32</p>
+</div>
 
-                <h1>Weather Monitoring Center</h1>
+<div class="headerButtons">
+<button id="themeBtn">🌙</button>
+<button id="infoBtn">ⓘ</button>
+</div>
 
-                <p>ESP32 IoT Dashboard</p>
+</header>
 
-            </div>
+<div class="statusBar">
 
-            <div class="status">
+<div class="status">
+<span class="onlineDot"></span>
+<span>Online</span>
+</div>
 
-                <div class="status-dot"></div>
+<div class="status">
+<span>👥</span>
+<span id="clients">1</span>
+</div>
 
-                <span>Online</span>
+<div class="status">
+<span>📶</span>
+<span>AP</span>
+</div>
 
-            </div>
+<div class="status">
+<span>🔄</span>
+<span>Live</span>
+</div>
 
-        </header>
+</div>
 
+<div class="grid">
 
+<div class="card">
 
-        <section class="hero">
+<div class="icon">
 
-            <div class="hero-content">
+<svg viewBox="0 0 24 24" fill="none" stroke="#f97316" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 
-                <p class="hero-title">
+<path d="M14 14.76V5a2 2 0 10-4 0v9.76a4 4 0 104 0z"/>
 
-                    Current Temperature
+</svg>
 
-                </p>
+</div>
 
-                <h2 id="temperature">
+<div class="value" id="temperature">28.4<span>°C</span></div>
 
-                    28.5°C
+<div class="label">Temperature</div>
 
-                </h2>
+</div>
 
-                <p id="weatherSummary">
+<div class="card">
 
-                    Good Air Quality • Comfortable Humidity
+<div class="icon">
 
-                </p>
+<svg viewBox="0 0 24 24" fill="none" stroke="#0ea5e9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 
-            </div>
+<path d="M12 2C8 7 6 10 6 13a6 6 0 0012 0c0-3-2-6-6-11z"/>
 
-        </section>
+</svg>
 
+</div>
 
+<div class="value" id="humidity">64<span>%</span></div>
 
-        <section class="sensor-grid">
+<div class="label">Humidity</div>
 
-            <div class="card">
+</div>
 
-                <div class="card-header">
+<div class="card">
 
-                    <span class="icon">🌡</span>
+<div class="icon">
 
-                    <h3>Temperature</h3>
+<svg viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 
-                </div>
+<circle cx="12" cy="12" r="8"/>
 
-                <p class="value"
+<path d="M12 12l4-4"/>
 
-                   id="temp">
+</svg>
 
-                    28.5°C
+</div>
 
-                </p>
+<div class="value" id="pressure">1008<span>hPa</span></div>
 
-            </div>
+<div class="label">Pressure</div>
 
+</div>
 
+<div class="card">
 
-            <div class="card">
+<div class="icon">
 
-                <div class="card-header">
+<svg viewBox="0 0 24 24" fill="none" stroke="#eab308" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 
-                    <span class="icon">💧</span>
+<circle cx="12" cy="12" r="4"/>
 
-                    <h3>Humidity</h3>
+<path d="M12 2v2"/>
 
-                </div>
+<path d="M12 20v2"/>
 
-                <p class="value"
+<path d="M4.93 4.93l1.41 1.41"/>
 
-                   id="humidity">
+<path d="M17.66 17.66l1.41 1.41"/>
 
-                    67%
+<path d="M2 12h2"/>
 
-                </p>
+<path d="M20 12h2"/>
 
-            </div>
+<path d="M4.93 19.07l1.41-1.41"/>
 
+<path d="M17.66 6.34l1.41-1.41"/>
 
+</svg>
 
-            <div class="card">
+</div>
 
-                <div class="card-header">
+<div class="value" id="light">512<span>Lux</span></div>
 
-                    <span class="icon">🌤</span>
+<div class="label">Light</div>
 
-                    <h3>Pressure</h3>
+</div>
 
-                </div>
+<div class="aqiCard">
 
-                <p class="value"
+<div class="aqiTitle">Air Quality</div>
 
-                   id="pressure">
+<div class="aqiValue" id="aqi">84</div>
 
-                    1013 hPa
+<div class="aqiStatus" id="aqiStatus">GOOD</div>
 
-                </p>
+<div class="aqiBar">
 
-            </div>
+<div class="aqiFill"></div>
 
+</div>
 
+<div class="aqiText">Healthy Environment</div>
 
-            <div class="card">
+</div>
 
-                <div class="card-header">
+<div class="card smallCard">
 
-                    <span class="icon">⛰</span>
+<div class="smallTitle">System</div>
 
-                    <h3>Altitude</h3>
+<div class="systemState normal">
 
-                </div>
+● Normal
 
-                <p class="value"
+</div>
 
-                   id="altitude">
+</div>
 
-                    228 m
+<div class="card smallCard">
 
-                </p>
+<div class="smallTitle">Alarm</div>
 
-            </div>
+<div class="alarmState">
 
+OFF
 
+</div>
 
-            <div class="card">
+</div>
 
-                <div class="card-header">
+</div>
 
-                    <span class="icon">☀</span>
+<div class="bottomBar">
 
-                    <h3>Light</h3>
+<div>
 
-                </div>
+🕒
 
-                <p class="value"
+<span id="updated">
 
-                   id="light">
+Just Now
 
-                    542 lux
+</span>
 
-                </p>
+</div>
 
-            </div>
+</div>
 
-
-
-            <div class="card">
-
-                <div class="card-header">
-
-                    <span class="icon">🌫</span>
-
-                    <h3>Air Quality</h3>
-
-                </div>
-
-                <p class="value"
-
-                   id="air">
-
-                    Good
-
-                </p>
-
-            </div>
-
-        </section>
-
-
-
-        <footer class="footer">
-
-            <div>
-
-                Wi-Fi :
-
-                <span id="wifi">
-
-                    Connected
-
-                </span>
-
-            </div>
-
-            <div>
-
-                Last Updated :
-
-                <span id="lastUpdate">
-
-                    12:45:10
-
-                </span>
-
-            </div>
-
-        </footer>
-
-    </div>
+</div>
 
 </body>
-
+</body>
 </html>
