@@ -4,7 +4,7 @@
 #include <Arduino.h>
 
 // ==========================================
-// PROGMEM HTML, CSS, JS ASSETS (LIGHT THEME + WATERMARKS)
+// PROGMEM HTML, CSS, JS ASSETS (LIGHT THEME + CHARTS + RINGS)
 // ==========================================
 const char INDEX_HTML[] PROGMEM = R"rawliteral(
 <!DOCTYPE html>
@@ -12,7 +12,7 @@ const char INDEX_HTML[] PROGMEM = R"rawliteral(
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart Weather Station </title>
+    <title>Smart Weather Station</title>
     <style>
         :root {
             --bg: #f1f5f9;
@@ -65,7 +65,7 @@ const char INDEX_HTML[] PROGMEM = R"rawliteral(
         .card-header { display: flex; justify-content: space-between; align-items: flex-start; color: var(--text-sub); font-size: 0.82rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 14px; }
         .svg-icon { width: 40px; height: 40px; }
         
-        .value-wrapper { margin: 10px 0; }
+        .value-wrapper { margin: 10px 0; display: flex; align-items: center; justify-content: space-between; }
         .value { font-size: 2.4rem; font-weight: 800; color: var(--text-main); letter-spacing: -1px; }
         .unit { font-size: 1.1rem; font-weight: 600; color: var(--text-sub); }
         
@@ -73,6 +73,17 @@ const char INDEX_HTML[] PROGMEM = R"rawliteral(
         .card-large { grid-column: span 2; }
         .row-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #f1f5f9; }
         .row-item:last-child { border-bottom: none; }
+        
+        /* Sparkline Canvas */
+        .sparkline-box { width: 100%; height: 50px; margin-top: 12px; }
+        canvas { width: 100%; height: 100%; display: block; }
+        
+        /* Circular Progress Rings */
+        .ring-container { position: relative; width: 68px; height: 68px; display: flex; align-items: center; justify-content: center; }
+        .ring-svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+        .ring-track { fill: none; stroke: #e2e8f0; stroke-width: 6; }
+        .ring-val { fill: none; stroke-width: 6; stroke-linecap: round; transition: stroke-dashoffset 0.8s ease-in-out, stroke 0.3s; }
+        .ring-icon { position: absolute; width: 24px; height: 24px; }
         
         /* Buttons & Footer */
         .btn-group { grid-column: span 2; display: flex; gap: 16px; }
@@ -120,16 +131,19 @@ const char INDEX_HTML[] PROGMEM = R"rawliteral(
             <svg class="svg-icon" viewBox="0 0 64 64" fill="none"><rect x="24" y="8" width="16" height="34" rx="8" fill="rgba(255,255,255,0.2)" stroke="#ffffff" stroke-width="3"/><circle cx="32" cy="46" r="12" fill="#ffffff"/><path d="M32 28V46" stroke="#ef4444" stroke-width="6" stroke-linecap="round"/><circle cx="32" cy="46" r="6" fill="#ef4444"/></svg>
         </div>
         <div class="value-wrapper">
-            <span id="val-temp" class="value">--</span><span class="unit">&deg;C</span>
+            <div><span id="val-temp" class="value">--</span><span class="unit">&deg;C</span></div>
         </div>
         <div id="temp-desc" class="sub-text" style="color:#ffffff; opacity: 0.95;">Monitoring thermal comfort...</div>
+        <div class="sparkline-box">
+            <canvas id="chart-temp" width="400" height="60"></canvas>
+        </div>
     </div>
 
     <div class="card card-large">
         <svg class="bg-watermark" viewBox="0 0 100 100"><path d="M55 5 L25 55 H50 L45 95 L75 45 H50 Z" fill="currentColor"/></svg>
         <div class="card-header">
             <span>POWER & BATTERY STATUS</span>
-            <svg class="svg-icon" id="bat-icon" viewBox="0 0 64 64" fill="none"><rect x="8" y="18" width="44" height="28" rx="6" fill="#f0f9ff" stroke="#0284c7" stroke-width="3"/><path d="M56 26H58C59.1046 26 60 26.8954 60 28V36C60 37.1046 59.1046 38 58 38H56V26Z" fill="#0284c7"/><rect id="bat-bar" x="13" y="23" width="34" height="18" rx="3" fill="#16a34a"/></svg>
+            <svg class="svg-icon" id="bat-icon" viewBox="0 0 64 64" fill="none"><rect x="8" y="18" width="44" height="28" rx="6" fill="#f0f9ff" stroke="#0284c7" stroke-width="3"/><path d="M56 26H58C59.1046 26 60 26.8954 60 28V36C60 37.1046 59.1046 38 58 38H56V26Z" fill="#0284c7"/></svg>
         </div>
         <div class="row-item">
             <span style="color:var(--text-sub); font-weight:600;">Active Power Source:</span>
@@ -137,20 +151,35 @@ const char INDEX_HTML[] PROGMEM = R"rawliteral(
         </div>
         <div class="row-item">
             <span style="color:var(--text-sub); font-weight:600;">Battery Level:</span>
-            <div>
-                <strong id="val-bat-pct" style="font-size:1.25rem;">--</strong>
-                <span id="val-bat-volts" style="color:var(--text-sub); font-size:0.95rem; font-weight:600; margin-left:6px;">(-- V)</span>
+            <div style="display:flex; align-items:center; gap:12px;">
+                <div>
+                    <strong id="val-bat-pct" style="font-size:1.25rem;">--</strong>
+                    <span id="val-bat-volts" style="color:var(--text-sub); font-size:0.95rem; font-weight:600; margin-left:4px;">(-- V)</span>
+                </div>
+                <div class="ring-container">
+                    <svg class="ring-svg" viewBox="0 0 64 64">
+                        <circle class="ring-track" cx="32" cy="32" r="26"/>
+                        <circle id="ring-bat-val" class="ring-val" cx="32" cy="32" r="26" stroke="#16a34a" stroke-dasharray="163.36" stroke-dashoffset="163.36"/>
+                    </svg>
+                    <svg class="ring-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                </div>
             </div>
         </div>
     </div>
 
     <div class="card">
         <svg class="bg-watermark" viewBox="0 0 100 100"><path d="M50 10 C50 10 20 45 20 65 C20 82 33 95 50 95 C67 95 80 82 80 65 C80 45 50 10 50 10 Z" fill="currentColor"/></svg>
-        <div class="card-header">
-            <span>HUMIDITY</span>
-            <svg class="svg-icon" viewBox="0 0 64 64" fill="none"><path d="M32 10C32 10 16 28 16 40C16 48.8366 23.1634 56 32 56C40.8366 56 48 48.8366 48 40C48 28 32 10 32 10Z" fill="#e0f2fe" stroke="#0284c7" stroke-width="3"/><path d="M38 38C40.2091 40.2091 40.2091 43.7909 38 46" stroke="#0284c7" stroke-width="3" stroke-linecap="round"/></svg>
+        <div class="card-header"><span>HUMIDITY</span></div>
+        <div class="value-wrapper">
+            <div><span id="val-hum" class="value">--</span><span class="unit">%</span></div>
+            <div class="ring-container">
+                <svg class="ring-svg" viewBox="0 0 64 64">
+                    <circle class="ring-track" cx="32" cy="32" r="26"/>
+                    <circle id="ring-hum-val" class="ring-val" cx="32" cy="32" r="26" stroke="#0284c7" stroke-dasharray="163.36" stroke-dashoffset="163.36"/>
+                </svg>
+                <svg class="ring-icon" viewBox="0 0 24 24" fill="#0284c7"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>
+            </div>
         </div>
-        <div class="value-wrapper"><span id="val-hum" class="value">--</span><span class="unit">%</span></div>
         <div class="sub-text" style="color:var(--text-sub);">Relative Moisture</div>
     </div>
 
@@ -160,7 +189,7 @@ const char INDEX_HTML[] PROGMEM = R"rawliteral(
             <span>LIGHT INTENSITY</span>
             <svg class="svg-icon" viewBox="0 0 64 64" fill="none"><circle cx="32" cy="32" r="14" fill="#fef9c3" stroke="#ca8a04" stroke-width="3"/><path d="M32 6V12M32 52V58M6 32H12M52 32H58M13.6 13.6L17.8 17.8M46.2 46.2L50.4 50.4M13.6 50.4L17.8 46.2M46.2 17.8L50.4 13.6" stroke="#ca8a04" stroke-width="3" stroke-linecap="round"/></svg>
         </div>
-        <div class="value-wrapper"><span id="val-light" class="value">--</span><span class="unit">lx</span></div>
+        <div class="value-wrapper"><div><span id="val-light" class="value">--</span><span class="unit">lx</span></div></div>
         <div id="val-light-type" class="sub-text" style="color:var(--warn); font-weight:800;">Evaluating...</div>
     </div>
 
@@ -179,6 +208,9 @@ const char INDEX_HTML[] PROGMEM = R"rawliteral(
                 <span style="color:var(--text-sub); display:block; font-size:0.85rem; font-weight:600;">Raw Index Value:</span>
                 <span id="val-gas-idx" style="font-weight:800; font-size:1.25rem;">--</span>
             </div>
+        </div>
+        <div class="sparkline-box" style="height:40px; margin-top:8px;">
+            <canvas id="chart-smoke" width="400" height="50"></canvas>
         </div>
     </div>
 
@@ -218,6 +250,52 @@ const char INDEX_HTML[] PROGMEM = R"rawliteral(
     window.onclick = function(e) { if (e.target.className === 'modal') e.target.style.display = 'none'; }
     function setTag(id, ok) { let el = document.getElementById(id); el.textContent = ok ? "OK" : "NOT FOUND"; el.className = ok ? "tag tag-ok" : "tag tag-err"; }
 
+    // --- SPARKLINE CHARTS ARRAY & DRAW LOGIC ---
+    let historyTemp = [];
+    let historySmoke = [];
+    const MAX_POINTS = 30;
+
+    function drawSparkline(canvasId, data, lineColor, fillGradTop) {
+        let canvas = document.getElementById(canvasId);
+        if (!canvas) return;
+        let ctx = canvas.getContext('2d');
+        let w = canvas.width; let h = canvas.height;
+        ctx.clearRect(0, 0, w, h);
+        if (data.length < 2) return;
+
+        let min = Math.min(...data); let max = Math.max(...data);
+        if (min === max) { min -= 1; max += 1; }
+        let range = max - min;
+        let step = w / (MAX_POINTS - 1);
+
+        ctx.beginPath();
+        for (let i = 0; i < data.length; i++) {
+            let x = i * step;
+            let y = h - ((data[i] - min) / range) * (h - 10) - 5;
+            if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+        }
+        ctx.strokeStyle = lineColor;
+        ctx.lineWidth = 3;
+        ctx.stroke();
+
+        // Gradient under line
+        ctx.lineTo((data.length - 1) * step, h); ctx.lineTo(0, h); ctx.closePath();
+        let grad = ctx.createLinearGradient(0, 0, 0, h);
+        grad.addColorStop(0, fillGradTop); grad.addColorStop(1, 'rgba(255,255,255,0)');
+        ctx.fillStyle = grad; ctx.fill();
+    }
+
+    // --- CIRCULAR RING PROGRESS LOGIC ---
+    function setRingProgress(ringId, percent, strokeColor) {
+        let ring = document.getElementById(ringId);
+        if (!ring) return;
+        let radius = 26; let circ = 2 * Math.PI * radius; // ~163.36
+        let p = Math.max(0, Math.min(percent, 100));
+        let offset = circ - (p / 100) * circ;
+        ring.style.strokeDashoffset = offset;
+        if (strokeColor) ring.style.stroke = strokeColor;
+    }
+
     function fetchData() {
         let xhr = new XMLHttpRequest();
         xhr.onreadystatechange = function() {
@@ -240,21 +318,37 @@ const char INDEX_HTML[] PROGMEM = R"rawliteral(
                     document.getElementById('val-clients').textContent = d.clients;
                     document.getElementById('val-time').textContent = new Date().toLocaleTimeString();
                     
-                    // Power & Battery Styling
+                    // Update Sparklines
+                    if (d.dht && !isNaN(parseFloat(d.temperature))) {
+                        historyTemp.push(parseFloat(d.temperature));
+                        if (historyTemp.length > MAX_POINTS) historyTemp.shift();
+                        drawSparkline('chart-temp', historyTemp, '#ffffff', 'rgba(255,255,255,0.4)');
+                    }
+                    if (d.mq135 && !isNaN(parseInt(d.gasIndex))) {
+                        historySmoke.push(parseInt(d.gasIndex));
+                        if (historySmoke.length > MAX_POINTS) historySmoke.shift();
+                        drawSparkline('chart-smoke', historySmoke, '#0284c7', 'rgba(2,132,199,0.3)');
+                    }
+
+                    // Update Humidity Ring
+                    if (d.dht && !isNaN(parseFloat(d.humidity))) {
+                        setRingProgress('ring-hum-val', parseFloat(d.humidity), '#0284c7');
+                    }
+
+                    // Update Battery Ring & Power
                     document.getElementById('val-power').textContent = d.powerSource;
                     if (d.batteryPct >= 0) {
                         document.getElementById('val-bat-pct').textContent = d.batteryPct + "%";
                         document.getElementById('val-bat-volts').textContent = "(" + d.batteryVolts + " V)";
-                        document.getElementById('bat-bar').style.width = Math.max(5, (d.batteryPct / 100) * 34) + "px";
-                        document.getElementById('bat-bar').setAttribute("fill", d.batteryPct > 20 ? "#16a34a" : "#dc2626");
+                        let batColor = d.batteryPct > 20 ? "#16a34a" : "#dc2626";
+                        setRingProgress('ring-bat-val', d.batteryPct, batColor);
                     } else {
-                        document.getElementById('val-bat-pct').textContent = "No Battery";
-                        document.getElementById('val-bat-volts').textContent = "(USB Power)";
-                        document.getElementById('bat-bar').style.width = "34px";
-                        document.getElementById('bat-bar').setAttribute("fill", "#0284c7");
+                        document.getElementById('val-bat-pct').textContent = "No Bat";
+                        document.getElementById('val-bat-volts').textContent = "(USB)";
+                        setRingProgress('ring-bat-val', 100, '#0284c7');
                     }
                     
-                    // Smoke status color
+                    // Smoke status text styling
                     let smkEl = document.getElementById('val-smoke-status');
                     if (d.smokeStatus.includes("Clean")) smkEl.style.color = "var(--good)";
                     else if (d.smokeStatus.includes("Normal")) smkEl.style.color = "var(--warn)";
