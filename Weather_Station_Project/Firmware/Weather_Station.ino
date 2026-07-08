@@ -1,6 +1,6 @@
 /**
  * @file Weather_Station.ino
- * @brief Complete ESP32 Smart Environment Monitoring System
+ * @brief Complete ESP32 Smart Environment Monitoring System PRO
  * Hardware: ESP32 DevKit V1 (30-Pin)
  */
 
@@ -34,7 +34,7 @@ unsigned long appStartTime = 0;
 // ==========================================
 void printStartupBanner() {
   Serial.println(F("\n======================================================="));
-  Serial.println(F("           SMART ENVIRONMENT MONITOR SYSTEM            "));
+  Serial.println(F("         SMART ENVIRONMENT MONITOR SYSTEM         "));
   Serial.println(F("======================================================="));
   Serial.printf(" Board:            %s\n", BOARD_NAME);
   Serial.printf(" Firmware Version: %s\n", FIRMWARE_VERSION);
@@ -44,20 +44,38 @@ void printStartupBanner() {
 
 String getSystemStateString(SystemState state) {
   switch(state) {
-    case STATE_NORMAL:    return F("NORMAL");
-    case STATE_WARNING:   return F("WARNING");
-    case STATE_CRITICAL:  return F("CRITICAL");
-    case STATE_EMERGENCY: return F("EMERGENCY");
+    case STATE_NORMAL:    return F("NORMAL (ALL CLEAR)");
+    case STATE_WARNING:   return F("WARNING (CHECK ROOM)");
+    case STATE_CRITICAL:  return F("CRITICAL ALERT");
+    case STATE_EMERGENCY: return F("EMERGENCY / HAZARD");
     default:              return F("UNKNOWN");
   }
 }
 
-String getAirQualityString(int aqi) {
-  if (aqi < 0) return F("--");
-  if (aqi <= AQI_MODERATE) return F("GOOD");
-  if (aqi <= AQI_POOR)     return F("MODERATE");
-  if (aqi <= AQI_HAZARDOUS)return F("POOR");
-  return F("HAZARDOUS");
+String getSmokeStatusString(int gasVal) {
+  if (gasVal < 0) return F("--");
+  if (gasVal <= 100) return F("Clean Air (No Smoke)");
+  if (gasVal <= 250) return F("Normal (Mild VOCs)");
+  if (gasVal <= 380) return F("Mild Smoke / Stuffy");
+  return F("Heavy Smoke / Hazard!");
+}
+
+String getLightTypeString(float lux) {
+  if (lux < 0) return F("--");
+  if (lux <= 10) return F("Pitch Black / Night");
+  if (lux <= 200) return F("Dim Indoor Lighting");
+  if (lux <= 1000) return F("Bright Indoor / Office");
+  if (lux <= 10000) return F("Overcast / Daylight");
+  return F("Direct Sunlight!");
+}
+
+String getPowerSourceString(PowerMode mode) {
+  switch(mode) {
+    case POWER_USB_ONLY:     return F("USB Power (No Battery)");
+    case POWER_BATTERY:      return F("Battery Power");
+    case POWER_USB_CHARGING: return F("USB + Charging");
+    default:                 return F("Unknown");
+  }
 }
 
 String getFormattedUptime() {
@@ -76,6 +94,7 @@ String getFormattedUptime() {
 void evaluateSystemState() {
   SystemState newState = STATE_NORMAL;
 
+  // Thermal evaluation
   if (currentData.dht_ok) {
     if (currentData.temperature >= 40.0 || currentData.temperature <= 0.0) {
       newState = max(newState, STATE_EMERGENCY);
@@ -86,22 +105,20 @@ void evaluateSystemState() {
     }
   }
 
-  if (currentData.mq135_ok && currentData.aqi >= 0) {
-    if (currentData.aqi > AQI_HAZARDOUS) {
-      newState = max(newState, STATE_EMERGENCY);
-    } else if (currentData.aqi > AQI_POOR) {
-      newState = max(newState, STATE_CRITICAL);
-    } else if (currentData.aqi > AQI_MODERATE) {
-      newState = max(newState, STATE_WARNING);
+  // Honest Smoke/Gas evaluation
+  if (currentData.mq135_ok && currentData.gasIndex >= 0) {
+    if (currentData.gasIndex > 380) {
+      newState = max(newState, STATE_EMERGENCY); // Heavy smoke
+    } else if (currentData.gasIndex > 250) {
+      newState = max(newState, STATE_WARNING);   // Mild smoke / stuffy
     }
   }
   currentState = newState;
 }
 
 // ==========================================
-// MANAGER CLASSES
+// WEBSERVER MANAGER CLASS
 // ==========================================
-
 class WebServerManager {
   private:
     WebServer server;
@@ -116,17 +133,25 @@ class WebServerManager {
       json += "\"humidity\":\"" + String(currentData.dht_ok ? String(currentData.humidity, 1) : "--") + "\",";
       json += "\"pressure\":\"" + String(currentData.bmp_ok ? String(currentData.pressure, 0) : "--") + "\",";
       json += "\"light\":\"" + String(currentData.bh1750_ok ? String(currentData.lux, 0) : "--") + "\",";
-      json += "\"aqi\":\"" + String(currentData.mq135_ok ? String(currentData.aqi) : "--") + "\",";
-      json += "\"airStatus\":\"" + getAirQualityString(currentData.aqi) + "\",";
+      json += "\"lightType\":\"" + getLightTypeString(currentData.lux) + "\",";
+      
+      json += "\"gasIndex\":\"" + String(currentData.mq135_ok ? String(currentData.gasIndex) : "--") + "\",";
+      json += "\"smokeStatus\":\"" + getSmokeStatusString(currentData.gasIndex) + "\",";
+      
+      json += "\"batteryVolts\":\"" + String(currentData.batteryVolts, 2) + "\",";
+      json += "\"batteryPct\":" + String(currentData.batteryPct) + ",";
+      json += "\"powerSource\":\"" + getPowerSourceString(currentData.powerMode) + "\",";
+      
       json += "\"systemStatus\":\"" + getSystemStateString(currentState) + "\",";
-      json += "\"alarm\":\"" + String(currentState == STATE_NORMAL ? "OFF" : "ACTIVE") + "\",";
       json += "\"clients\":\"" + String(getConnectedClients()) + "\",";
       json += "\"ip\":\"" + getIpAddress() + "\",";
       json += "\"uptime\":\"" + getFormattedUptime() + "\",";
+      
       json += "\"dht\":" + String(currentData.dht_ok ? "true" : "false") + ",";
       json += "\"bmp\":" + String(currentData.bmp_ok ? "true" : "false") + ",";
       json += "\"bh1750\":" + String(currentData.bh1750_ok ? "true" : "false") + ",";
       json += "\"mq135\":" + String(currentData.mq135_ok ? "true" : "false") + ",";
+      
       json += "\"board\":\"" + String(BOARD_NAME) + "\",";
       json += "\"fw\":\"" + String(FIRMWARE_VERSION) + "\",";
       json += "\"ssid\":\"" + String(WIFI_SSID) + "\"";
@@ -161,9 +186,11 @@ class WebServerManager {
     String getIpAddress() { return WiFi.softAPIP().toString(); }
 };
 
-// Global WebServer Instance
 WebServerManager webServer;
 
+// ==========================================
+// SENSOR MANAGER CLASS
+// ==========================================
 class SensorManager {
   private:
     DHT dht;
@@ -171,9 +198,36 @@ class SensorManager {
     BH1750 bh1750;
     
     unsigned long lastDhtRead = 0, lastBmpRead = 0, lastBh1750Read = 0;
-    unsigned long lastMq135Read = 0, lastSerialPrint = 0;
+    unsigned long lastMq135Read = 0, lastBatRead = 0, lastSerialPrint = 0;
     bool bmpFound = false, bhFound = false;
     float sealevelPressure = 1013.25;
+
+    void readBattery() {
+      // Average 10 ADC samples for rock-solid stability
+      long rawSum = 0;
+      for (int i = 0; i < 10; i++) {
+        rawSum += analogRead(PIN_BATTERY);
+      }
+      float rawAvg = rawSum / 10.0f;
+      
+      // Calculate voltage at pin, then multiply by divider ratio (2.0 for 10k+10k)
+      float pinVoltage = (rawAvg / 4095.0f) * ADC_VOLTAGE_REF;
+      currentData.batteryVolts = pinVoltage * VOLTAGE_DIVIDER_R;
+      
+      // Determine Power Mode and Percentage
+      if (currentData.batteryVolts < NO_BATTERY_THRESH) {
+        currentData.powerMode = POWER_USB_ONLY;
+        currentData.batteryPct = -1; // -1 represents "No Battery"
+      } else if (currentData.batteryVolts >= USB_VOLTAGE_THRESH) {
+        currentData.powerMode = POWER_USB_CHARGING;
+        currentData.batteryPct = 100;
+      } else {
+        currentData.powerMode = POWER_BATTERY;
+        // Map voltage between 3.0V (0%) and 4.2V (100%)
+        float pct = ((currentData.batteryVolts - BATTERY_MIN_V) / (BATTERY_MAX_V - BATTERY_MIN_V)) * 100.0f;
+        currentData.batteryPct = constrain((int)pct, 0, 100);
+      }
+    }
 
   public:
     SensorManager() : dht(PIN_DHT22, DHT22) {}
@@ -191,7 +245,7 @@ class SensorManager {
       } else {
         bmpFound = false;
         currentData.bmp_ok = false;
-        Serial.println(F(" [ERR] BMP280 sensor not found on I2C bus!"));
+        Serial.println(F(" [ERR] BMP280 sensor not found!"));
       }
 
       if (bh1750.begin(BH1750::CONTINUOUS_HIGH_RES_MODE)) {
@@ -205,12 +259,15 @@ class SensorManager {
       }
 
       pinMode(PIN_MQ135, INPUT);
+      pinMode(PIN_BATTERY, INPUT);
       analogReadResolution(12);
       currentData.mq135_ok = true;
-      Serial.println(F(" [OK] MQ135 analog input initialized."));
+      Serial.println(F(" [OK] MQ135 & Battery ADCs initialized."));
       
       currentData.temperature = currentData.humidity = currentData.pressure = currentData.altitude = currentData.lux = -999;
-      currentData.aqi = -1;
+      currentData.gasIndex = -1;
+      currentData.batteryVolts = 0.0f;
+      currentData.batteryPct = -1;
     }
 
     void update() {
@@ -252,12 +309,18 @@ class SensorManager {
         lastMq135Read = now;
         int raw = analogRead(PIN_MQ135);
         if (raw >= 0 && raw <= 4095) {
-          currentData.aqi = map(raw, MQ135_RAW_MIN, MQ135_RAW_MAX, 0, AQI_MAX_VAL);
+          currentData.gasIndex = map(raw, MQ135_RAW_MIN, MQ135_RAW_MAX, 0, GAS_MAX_VAL);
           currentData.mq135_ok = true;
         } else {
           currentData.mq135_ok = false;
         }
       }
+
+      if (now - lastBatRead >= INTERVAL_BATTERY) {
+        lastBatRead = now;
+        readBattery();
+      }
+
       evaluateSystemState();
     }
 
@@ -267,6 +330,9 @@ class SensorManager {
         lastSerialPrint = now;
         Serial.println(F("\n--- ENVIRONMENTAL STATUS REPORT ---"));
         Serial.printf(" System State:      %s\n", getSystemStateString(currentState).c_str());
+        Serial.printf(" Power Source:      %s", getPowerSourceString(currentData.powerMode).c_str());
+        if (currentData.batteryPct >= 0) Serial.printf(" (%d%% | %.2fV)\n", currentData.batteryPct, currentData.batteryVolts);
+        else Serial.println(F(" (%.2fV)"));
         
         if (currentData.dht_ok) { Serial.printf(" Temperature:       %.1f C\n Humidity:          %.1f %%\n", currentData.temperature, currentData.humidity); } 
         else { Serial.println(F(" Temperature:       [NO DATA]\n Humidity:          [NO DATA]")); }
@@ -274,11 +340,11 @@ class SensorManager {
         if (currentData.bmp_ok) Serial.printf(" Pressure:          %.1f hPa\n", currentData.pressure);
         else Serial.println(F(" Pressure:          [NO DATA]"));
 
-        if (currentData.bh1750_ok) Serial.printf(" Light Intensity:   %.1f lx\n", currentData.lux);
-        else Serial.println(F(" Light Intensity:   [NO DATA]"));
+        if (currentData.bh1750_ok) Serial.printf(" Light:             %.1f lx (%s)\n", currentData.lux, getLightTypeString(currentData.lux).c_str());
+        else Serial.println(F(" Light:             [NO DATA]"));
 
-        if (currentData.mq135_ok) Serial.printf(" AQI (Air Quality): %d (%s)\n", currentData.aqi, getAirQualityString(currentData.aqi).c_str());
-        else Serial.println(F(" AQI (Air Quality): [NO DATA]"));
+        if (currentData.mq135_ok) Serial.printf(" Gas/Smoke:         %d (%s)\n", currentData.gasIndex, getSmokeStatusString(currentData.gasIndex).c_str());
+        else Serial.println(F(" Gas/Smoke:         [NO DATA]"));
 
         Serial.printf(" Connected Clients: %d\n", webServer.getConnectedClients());
         Serial.println(F("-----------------------------------"));
@@ -286,6 +352,9 @@ class SensorManager {
     }
 };
 
+// ==========================================
+// OUTPUT MANAGER CLASS
+// ==========================================
 class OutputManager {
   private:
     unsigned long lastBuzzerTick = 0;
@@ -349,7 +418,7 @@ class OutputManager {
       }
     }
 
-    void checkButton(); // Declared here, implemented below DisplayManager to avoid circular logic
+    void checkButton();
     
     void update() {
       checkButton();
@@ -358,6 +427,9 @@ class OutputManager {
     }
 };
 
+// ==========================================
+// DISPLAY MANAGER CLASS
+// ==========================================
 class DisplayManager {
   private:
     Adafruit_SSD1306 oled;
@@ -389,7 +461,7 @@ class DisplayManager {
     void showSplash(String ipAddress) {
       if (!initialized) return;
       oled.clearDisplay(); oled.setTextSize(1);
-      oled.setCursor(10, 5); oled.println(F("SMART ENV MONITOR"));
+      oled.setCursor(1, 5); oled.println(F("SMART WEATHER STATION"));
       oled.drawFastHLine(0, 16, OLED_WIDTH, SSD1306_WHITE);
       oled.setCursor(0, 25); oled.print(F("Firmware: ")); oled.println(FIRMWARE_VERSION);
       oled.setCursor(0, 40); oled.println(F("WiFi Access Point:"));
@@ -403,7 +475,7 @@ class DisplayManager {
       if (!initialized) return;
       oled.clearDisplay(); oled.setTextSize(2); oled.setCursor(20, 25);
       oled.println(isOledLocked ? F("LOCKED") : F("UNLOCKED")); oled.display();
-      delay(800); // Simple block to show message, ok for UI event
+      delay(800);
       lastPageSwitch = millis();
     }
 
@@ -417,45 +489,44 @@ class DisplayManager {
       }
       oled.clearDisplay();
       switch (currentPage) {
-        case 1: drawHeader(F("TEMP & HUMIDITY")); 
-                oled.setTextSize(1); oled.setCursor(0, 20); oled.print(F("Temp: ")); oled.setTextSize(2);
+        case 1: drawHeader(F("TEMPERATURE FOCUS")); 
+                oled.setTextSize(1); oled.setCursor(0, 18); oled.print(F("Temp: ")); oled.setTextSize(2);
                 currentData.dht_ok ? oled.printf("%.1f C", currentData.temperature) : oled.print(F("--"));
                 oled.setTextSize(1); oled.setCursor(0, 42); oled.print(F("Hum:  ")); oled.setTextSize(2);
                 currentData.dht_ok ? oled.printf("%.1f %%", currentData.humidity) : oled.print(F("--"));
                 break;
-        case 2: drawHeader(F("PRESSURE & LIGHT")); 
-                oled.setTextSize(1); oled.setCursor(0, 20); oled.print(F("Pres: ")); oled.setTextSize(2);
+        case 2: drawHeader(F("LIGHT & PRESSURE")); 
+                oled.setTextSize(1); oled.setCursor(0, 18); oled.print(F("Light: ")); oled.setTextSize(1);
+                currentData.bh1750_ok ? oled.printf("%.0f lx (%s)", currentData.lux, getLightTypeString(currentData.lux).c_str()) : oled.print(F("--"));
+                oled.setCursor(0, 40); oled.print(F("Pres: ")); oled.setTextSize(2);
                 currentData.bmp_ok ? oled.printf("%.0f hPa", currentData.pressure) : oled.print(F("--"));
-                oled.setTextSize(1); oled.setCursor(0, 42); oled.print(F("Light:")); oled.setTextSize(2);
-                currentData.bh1750_ok ? oled.printf("%.0f lx", currentData.lux) : oled.print(F("--"));
                 break;
-        case 3: drawHeader(F("AIR QUALITY")); 
-                oled.setTextSize(1); oled.setCursor(0, 20); oled.print(F("AQI Val: ")); oled.setTextSize(2);
-                currentData.mq135_ok ? oled.printf("%d", currentData.aqi) : oled.print(F("--"));
-                oled.setTextSize(1); oled.setCursor(0, 42); oled.print(F("Status: ")); oled.setTextSize(2);
-                oled.print(getAirQualityString(currentData.aqi));
+        case 3: drawHeader(F("SMOKE & GAS MONITOR")); 
+                oled.setTextSize(1); oled.setCursor(0, 18); oled.print(F("Index: ")); oled.setTextSize(2);
+                currentData.mq135_ok ? oled.printf("%d", currentData.gasIndex) : oled.print(F("--"));
+                oled.setTextSize(1); oled.setCursor(0, 42); oled.print(F("Status: ")); oled.setTextSize(1);
+                oled.print(getSmokeStatusString(currentData.gasIndex));
                 break;
-        case 4: drawHeader(F("WIFI & CLIENTS")); 
-                oled.setTextSize(1); oled.setCursor(0, 20); oled.print(F("SSID: ")); oled.println(WIFI_SSID);
-                oled.setCursor(0, 35); oled.print(F("Pass: ")); oled.println(WIFI_PASS);
-                oled.setCursor(0, 50); oled.printf("Users: %d", webServer.getConnectedClients());
+        case 4: drawHeader(F("POWER & BATTERY")); 
+                oled.setTextSize(1); oled.setCursor(0, 18); oled.print(F("Mode: ")); oled.println(getPowerSourceString(currentData.powerMode));
+                oled.setCursor(0, 34); oled.print(F("Level: ")); oled.setTextSize(2);
+                currentData.batteryPct >= 0 ? oled.printf("%d %%", currentData.batteryPct) : oled.print(F("No Bat"));
+                oled.setTextSize(1); oled.setCursor(0, 54); oled.printf("Volts: %.2f V", currentData.batteryVolts);
                 break;
         case 5: drawHeader(F("SYSTEM STATUS")); 
-                oled.setTextSize(1); oled.setCursor(0, 20); oled.print(F("State: ")); oled.println(getSystemStateString(currentState));
-                oled.setCursor(0, 35); oled.print(F("IP: ")); oled.println(webServer.getIpAddress());
-                oled.setCursor(0, 50); oled.print(F("Up: ")); oled.println(getFormattedUptime());
+                oled.setTextSize(1); oled.setCursor(0, 18); oled.print(F("State: ")); oled.println(getSystemStateString(currentState));
+                oled.setCursor(0, 34); oled.print(F("IP: ")); oled.println(webServer.getIpAddress());
+                oled.setCursor(0, 48); oled.print(F("Up: ")); oled.println(getFormattedUptime());
                 break;
       }
       oled.display();
     }
 };
 
-// Global Object Instances
 SensorManager sensors;
 DisplayManager display;
 OutputManager outputs;
 
-// Button check implementation linked to Display toggle
 void OutputManager::checkButton() {
   bool reading = digitalRead(PIN_BUTTON);
   if (reading != lastButtonState) lastDebounceTime = millis();
@@ -464,7 +535,6 @@ void OutputManager::checkButton() {
   }
   lastButtonState = reading;
 }
-
 
 // ==========================================
 // ARDUINO SETUP & LOOP
