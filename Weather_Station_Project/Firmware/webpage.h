@@ -3,9 +3,6 @@
 
 #include <Arduino.h>
 
-// ==========================================
-// PROGMEM HTML, CSS, JS ASSETS (LIGHT THEME + CHARTS + RINGS)
-// ==========================================
 const char INDEX_HTML[] PROGMEM = R"rawliteral(
 <!DOCTYPE html>
 <html lang="en">
@@ -19,281 +16,269 @@ const char INDEX_HTML[] PROGMEM = R"rawliteral(
             --card-bg: #ffffff;
             --text-main: #0f172a;
             --text-sub: #64748b;
-            --accent: #0284c7;
-            --border: #e2e8f0;
-            --good: #16a34a;
-            --warn: #ca8a04;
-            --crit: #ea580c;
-            --emerg: #dc2626;
-            --hero-grad: linear-gradient(135deg, #0284c7 0%, #2563eb 100%);
-            --shadow: 0 4px 20px -2px rgba(148, 163, 184, 0.15);
-            --shadow-hover: 0 12px 25px -4px rgba(148, 163, 184, 0.25);
+            --border: #edf2f7;
+            --shadow: 0 4px 18px -2px rgba(0, 0, 0, 0.05);
+            --shadow-hover: 0 12px 25px -4px rgba(0, 0, 0, 0.1);
+            --hero-grad: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
         }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
-        body { background: var(--bg); color: var(--text-main); padding: 18px; min-height: 100vh; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body { background: var(--bg); color: var(--text-main); padding: 20px; min-height: 100vh; overflow-x: hidden; }
         
-        /* Header */
-        header { display: flex; justify-content: space-between; align-items: center; max-width: 1200px; margin: 0 auto 20px auto; background: var(--card-bg); padding: 16px 24px; border-radius: 18px; box-shadow: var(--shadow); border: 1px solid var(--border); }
-        .logo { display: flex; align-items: center; gap: 12px; font-weight: 800; font-size: 1.35rem; color: var(--text-main); letter-spacing: -0.5px; }
-        .logo-svg { width: 38px; height: 38px; }
+        /* Navbar */
+        header { display: flex; justify-content: space-between; align-items: center; max-width: 1100px; margin: 0 auto 20px auto; background: var(--card-bg); padding: 16px 24px; border-radius: 20px; box-shadow: var(--shadow); border: 1px solid var(--border); }
+        .logo-area { display: flex; align-items: center; gap: 14px; }
+        .logo-icon { width: 42px; height: 42px; }
+        .logo-title { font-size: 1.3rem; font-weight: 800; color: var(--text-main); letter-spacing: -0.5px; }
+        .logo-sub { font-size: 0.8rem; font-weight: 600; color: var(--text-sub); }
+        .status-pill { display: flex; align-items: center; gap: 8px; font-size: 0.8rem; font-weight: 700; padding: 6px 14px; border-radius: 30px; background: #dcfce7; color: #16a34a; border: 1px solid #bbf7d0; }
+        .status-dot-nav { width: 8px; height: 8px; background: #16a34a; border-radius: 50%; box-shadow: 0 0 8px #16a34a; animation: pulse 2s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+        .offline { background: #fee2e2; color: #dc2626; border-color: #fecaca; }
+        .offline .status-dot-nav { background: #dc2626; box-shadow: none; animation: none; }
+
+        /* Grid System */
+        .grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 18px; max-width: 1100px; margin: 0 auto; }
+        .card { padding: 24px; border-radius: 22px; box-shadow: var(--shadow); border: 1px solid var(--border); position: relative; overflow: hidden; transition: all 0.25s ease; display: flex; flex-direction: column; justify-content: space-between; }
+        .card:hover { transform: translateY(-3px); box-shadow: var(--shadow-hover); }
+        .span-6 { grid-column: span 6; } .span-3 { grid-column: span 3; } .span-2 { grid-column: span 2; }
         
-        /* Status Badge */
-        .status-badge { display: flex; align-items: center; gap: 8px; font-size: 0.85rem; font-weight: 700; padding: 6px 14px; border-radius: 30px; background: #dcfce7; color: var(--good); border: 1px solid #bbf7d0; transition: all 0.3s; }
-        .status-dot { width: 8px; height: 8px; background-color: var(--good); border-radius: 50%; box-shadow: 0 0 8px var(--good); animation: pulse 2s infinite; }
-        @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(1.2); } }
-        .offline { background: #fee2e2; color: var(--emerg); border-color: #fecaca; }
-        .offline .status-dot { background-color: var(--emerg); box-shadow: 0 0 8px var(--emerg); animation: none; }
+        /* ======================================================== */
+        /* 🎨 DYNAMIC PREMIUM COLOR THEMES                          */
+        /* ======================================================== */
+        .t-temp { background: var(--hero-grad); border: none; --c-main: #ffffff; --c-sub: rgba(255,255,255,0.85); --c-icn: #ffffff; --c-bg: rgba(255,255,255,0.2); --c-wm: #ffffff; }
+        .t-bat  { background: linear-gradient(135deg, #f0fdf4, #dcfce7); border-color: #bbf7d0; --c-main: #14532d; --c-sub: #166534; --c-icn: #16a34a; --c-bg: #bbf7d0; --c-wm: #86efac; }
+        .t-hum  { background: linear-gradient(135deg, #f0f9ff, #e0f2fe); border-color: #bae6fd; --c-main: #0c4a6e; --c-sub: #075985; --c-icn: #0284c7; --c-bg: #bae6fd; --c-wm: #7dd3fc; }
+        .t-lgt  { background: linear-gradient(135deg, #fefce8, #fef08a); border-color: #fde047; --c-main: #713f12; --c-sub: #a16207; --c-icn: #ca8a04; --c-bg: #fde047; --c-wm: #facc15; }
+        .t-prs  { background: linear-gradient(135deg, #faf5ff, #f3e8ff); border-color: #e9d5ff; --c-main: #581c87; --c-sub: #7e22ce; --c-icn: #9333ea; --c-bg: #e9d5ff; --c-wm: #d8b4fe; }
+        .t-dew  { background: linear-gradient(135deg, #f0fdfa, #ccfbf1); border-color: #99f6e4; --c-main: #134e4a; --c-sub: #0f766e; --c-icn: #0d9488; --c-bg: #99f6e4; --c-wm: #5eead4; }
+        .t-smk  { background: linear-gradient(135deg, #f8fafc, #f1f5f9); border-color: #e2e8f0; --c-main: #0f172a; --c-sub: #475569; --c-icn: #64748b; --c-bg: #e2e8f0; --c-wm: #cbd5e1; }
         
-        /* Grid & Cards */
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; max-width: 1200px; margin: 0 auto; }
-        .card { background: var(--card-bg); padding: 24px; border-radius: 22px; box-shadow: var(--shadow); border: 1px solid var(--border); display: flex; flex-direction: column; justify-content: space-between; position: relative; overflow: hidden; z-index: 1; transition: transform 0.25s ease, box-shadow 0.25s ease; }
-        .card:hover { transform: translateY(-4px); box-shadow: var(--shadow-hover); }
+        /* Auto-Themed Elements */
+        .header-title { color: var(--c-icn); display: flex; align-items: center; gap: 10px; font-size: 0.82rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; }
+        .icon-circle { background: var(--c-bg); color: var(--c-icn); width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .metric-val { color: var(--c-main); font-size: 2.4rem; font-weight: 800; letter-spacing: -1px; margin: 6px 0; }
+        .metric-unit { color: var(--c-sub); font-size: 1.1rem; font-weight: 600; margin-left: 2px; }
+        .sub-text { color: var(--c-sub); font-size: 0.85rem; font-weight: 600; margin-bottom: 8px;}
         
-        /* Background Watermark SVGs */
-        .bg-watermark { position: absolute; right: -15px; bottom: -15px; width: 160px; height: 160px; opacity: 0.04; z-index: -1; pointer-events: none; transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s; fill: var(--text-main); }
-        .card:hover .bg-watermark { transform: scale(1.12) rotate(-6deg); opacity: 0.07; }
-        
-        /* Hero Card (Temperature) */
-        .hero { grid-column: span 2; background: var(--hero-grad); border: none; padding: 30px; color: #ffffff; }
-        .hero .card-header { color: rgba(255,255,255,0.9); }
-        .hero .value { font-size: 4.5rem; color: #ffffff; text-shadow: 0 2px 10px rgba(0,0,0,0.15); }
-        .hero .unit { font-size: 2rem; color: rgba(255,255,255,0.9); }
-        .hero .bg-watermark { fill: #ffffff; opacity: 0.12; right: -5px; bottom: -10px; width: 220px; height: 220px; }
-        .hero:hover .bg-watermark { opacity: 0.18; }
-        
-        /* Typography & Layout */
-        .card-header { display: flex; justify-content: space-between; align-items: flex-start; color: var(--text-sub); font-size: 0.82rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 14px; }
-        .svg-icon { width: 40px; height: 40px; }
-        
-        .value-wrapper { margin: 10px 0; display: flex; align-items: center; justify-content: space-between; }
-        .value { font-size: 2.4rem; font-weight: 800; color: var(--text-main); letter-spacing: -1px; }
-        .unit { font-size: 1.1rem; font-weight: 600; color: var(--text-sub); }
-        
-        .sub-text { font-size: 0.92rem; font-weight: 700; color: var(--accent); margin-top: 6px; display: flex; align-items: center; gap: 6px; }
-        .card-large { grid-column: span 2; }
-        .row-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #f1f5f9; }
-        .row-item:last-child { border-bottom: none; }
-        
-        /* Sparkline Canvas */
-        .sparkline-box { width: 100%; height: 50px; margin-top: 12px; }
+        /* Themed Badges */
+        .badge { background: var(--c-bg); color: var(--c-main); font-size: 0.75rem; font-weight: 700; padding: 4px 12px; border-radius: 20px; display: flex; align-items: center; gap: 6px; width: fit-content; margin: 0 auto; }
+        .badge .status-dot { background: var(--c-icn); width: 6px; height: 6px; border-radius: 50%; }
+
+        /* Themed Background Watermark SVGs */
+        .bg-watermark { position: absolute; right: -20px; bottom: -20px; width: 150px; height: 150px; color: var(--c-wm); opacity: 0.45; z-index: 0; pointer-events: none; transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s; }
+        .span-6 .bg-watermark { width: 220px; height: 220px; right: -10px; bottom: -30px; }
+        .t-temp .bg-watermark { opacity: 0.15; }
+        .card:hover .bg-watermark { transform: scale(1.15) rotate(-5deg); opacity: 0.7; }
+        .card > div, .card > canvas, .card > .arch-wrap, .card > .aqi-bar-container { position: relative; z-index: 1; }
+        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+
+        /* Hero Card Overrides */
+        .hero-body { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; margin: 10px 0; }
+        .temp-main { font-size: 4.5rem; font-weight: 800; color: var(--c-main); letter-spacing: -2px; line-height: 1; }
+        .hero-chart-wrap { flex: 1; min-width: 180px; height: 80px; margin-left: 20px; }
+        .stats-bar { display: flex; justify-content: space-around; background: rgba(255,255,255,0.15); padding: 14px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.2); margin-top: 15px; flex-wrap: wrap; gap: 10px; }
+        .stat-item { font-size: 0.88rem; font-weight: 700; color: var(--c-main); display: flex; align-items: center; gap: 6px; }
+
+        /* Power & Battery Split Card */
+        .split-card { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px; }
+        .split-half { flex: 1; min-width: 180px; display: flex; justify-content: space-between; align-items: center; padding: 10px; }
+        .split-divider { width: 1px; height: 50px; background: var(--c-bg); }
+        .power-label { font-size: 0.85rem; font-weight: 600; color: var(--c-sub); margin-bottom: 4px; }
+        .power-val { font-size: 1.3rem; font-weight: 800; color: var(--c-main); }
+
+        /* Sparklines & Charts */
+        .sparkline-box { width: 100%; height: 50px; margin: 10px 0; }
         canvas { width: 100%; height: 100%; display: block; }
+        .aqi-bar-container { width: 100%; margin: 15px 0 10px 0; }
+        .aqi-bar { width: 100%; height: 10px; border-radius: 10px; background: linear-gradient(90deg, #22c55e 0%, #eab308 50%, #ef4444 100%); position: relative; box-shadow: inset 0 1px 3px rgba(0,0,0,0.1); }
+        .aqi-thumb { width: 16px; height: 16px; background: #ffffff; border: 3px solid var(--c-main); border-radius: 50%; position: absolute; top: -3px; left: 0%; transition: left 0.5s ease; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
         
-        /* Circular Progress Rings */
-        .ring-container { position: relative; width: 68px; height: 68px; display: flex; align-items: center; justify-content: center; }
-        .ring-svg { width: 100%; height: 100%; transform: rotate(-90deg); }
-        .ring-track { fill: none; stroke: #e2e8f0; stroke-width: 6; }
-        .ring-val { fill: none; stroke-width: 6; stroke-linecap: round; transition: stroke-dashoffset 0.8s ease-in-out, stroke 0.3s; }
-        .ring-icon { position: absolute; width: 24px; height: 24px; }
-        
-        /* Buttons & Footer */
-        .btn-group { grid-column: span 2; display: flex; gap: 16px; }
-        button { flex: 1; padding: 15px; border: 1px solid var(--border); background: var(--card-bg); color: var(--text-main); font-weight: 700; font-size: 0.95rem; border-radius: 16px; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: var(--shadow); }
-        button:hover { background: #f8fafc; border-color: var(--accent); color: var(--accent); transform: translateY(-2px); }
-        
-        .footer-info { grid-column: span 2; display: flex; justify-content: space-around; background: var(--card-bg); padding: 18px; border-radius: 16px; font-size: 0.88rem; color: var(--text-sub); border: 1px solid var(--border); box-shadow: var(--shadow); }
+        /* Footer & Buttons */
+        footer { max-width: 1100px; margin: 20px auto 0 auto; display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; font-weight: 600; color: var(--text-sub); padding: 10px 14px; flex-wrap: wrap; gap: 10px; }
+        .btn-row { max-width: 1100px; margin: 15px auto 0 auto; display: flex; gap: 14px; }
+        button { flex: 1; padding: 12px; border: 1px solid var(--border); background: var(--card-bg); color: var(--text-main); font-weight: 700; border-radius: 14px; cursor: pointer; box-shadow: var(--shadow); transition: all 0.2s; }
+        button:hover { background: #f8fafc; color: #0284c7; border-color: #bae6fd; }
         
         /* Modals */
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(4px); z-index: 100; justify-content: center; align-items: center; padding: 20px; }
-        .modal-content { background: var(--card-bg); padding: 28px; border-radius: 22px; max-width: 420px; width: 100%; border: 1px solid var(--border); box-shadow: 0 20px 50px rgba(0,0,0,0.15); }
-        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; font-weight: 800; font-size: 1.25rem; color: var(--text-main); }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); backdrop-filter: blur(4px); z-index: 100; justify-content: center; align-items: center; padding: 20px; }
+        .modal-content { background: var(--card-bg); padding: 26px; border-radius: 22px; max-width: 400px; width: 100%; border: 1px solid var(--border); }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; font-weight: 800; font-size: 1.2rem; }
         .close { cursor: pointer; font-size: 1.5rem; color: var(--text-sub); }
-        .list-item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 0.92rem; }
-        .list-item:last-child { border-bottom: none; }
-        .tag { padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 800; }
-        .tag-ok { background: #dcfce7; color: var(--good); }
-        .tag-err { background: #fee2e2; color: var(--emerg); }
+        .list-item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
         
-        @media (min-width: 768px) {
-            .grid { grid-template-columns: repeat(4, 1fr); }
-            .hero, .card-large { grid-column: span 2; }
-            .footer-info, .btn-group { grid-column: span 4; }
+        /* Mobile Override */
+        @media (max-width: 850px) { 
+            .grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+            .span-6, .card-mq { grid-column: span 2; }
+            .span-2, .card-dew { grid-column: span 1; }
+            .split-divider { display: none; }
+            .temp-main { font-size: 3.2rem; } .metric-val { font-size: 1.7rem; } .metric-unit { font-size: 0.9rem; }
+            .card { padding: 18px; } .header-title { font-size: 0.72rem; gap: 6px; }
+            .icon-circle { width: 28px; height: 28px; } .icon-circle svg { width: 14px; height: 14px; }
+            .stats-bar { padding: 10px; gap: 6px; } .stat-item { font-size: 0.78rem; }
+            .hero-chart-wrap { margin-left: 0; margin-top: 10px; width: 100%; }
         }
     </style>
 </head>
 <body>
 
 <header>
-    <div class="logo">
-        <svg class="logo-svg" viewBox="0 0 64 64" fill="none"><circle cx="32" cy="32" r="28" fill="#e0f2fe"/><path d="M32 10V22M32 42V54M10 32H22M42 32H54M16.44 16.44L24.93 24.93M39.07 39.07L47.56 47.56M16.44 47.56L24.93 39.07M39.07 24.93L47.56 16.44" stroke="#0284c7" stroke-width="4" stroke-linecap="round"/><circle cx="32" cy="32" r="10" fill="#0284c7"/></svg>
-        <span>Smart Weather <span style="color:var(--accent); font-weight:300;">Station</span></span>
+    <div class="logo-area">
+        <svg class="logo-icon" viewBox="0 0 64 64"><circle cx="32" cy="32" r="26" fill="#ffedd5"/><path d="M46 38H22C16.4772 38 12 33.5228 12 28C12 22.4772 16.4772 18 22 18C23.3642 18 24.6644 18.2728 25.8453 18.7716C27.6974 13.4072 32.9038 9.5 39 9.5C46.4558 9.5 52.5 15.5442 52.5 23C52.5 23.407 52.4822 23.8099 52.4473 24.208C57.915 25.0294 62 29.7423 62 35.4C62 41.2542 57.2542 46 51.4 46H46" fill="#ffffff" stroke="#ea580c" stroke-width="3.5"/><circle cx="24" cy="20" r="6" fill="#facc15"/></svg>
+        <div>
+            <div class="logo-title">Smart Weather Station</div>
+            <div class="logo-sub">Real-time Environmental Monitoring</div>
+        </div>
     </div>
-    <div id="connection-status" class="status-badge">
-        <div class="status-dot"></div>
+    <div id="connection-status" class="status-pill">
+        <div class="status-dot-nav"></div>
         <span id="conn-text">ONLINE</span>
     </div>
 </header>
 
 <div class="grid">
-    <div class="card hero">
-        <svg class="bg-watermark" viewBox="0 0 100 100"><path d="M10 50 Q 25 20, 50 50 T 90 50 M10 65 Q 25 35, 50 65 T 90 65 M10 35 Q 25 5, 50 35 T 90 35" fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="round"/></svg>
+    <div class="card span-6 t-temp">
+        <svg class="bg-watermark" style="fill:currentColor;" viewBox="0 0 100 100"><path d="M50 15 A 10 10 0 0 0 40 25 V 60 A 20 20 0 1 0 60 60 V 25 A 10 10 0 0 0 50 15 Z M50 85 A 10 10 0 1 1 50 65 V 25 A 5 5 0 0 1 50 15 A 5 5 0 0 1 50 25 V 65 A 10 10 0 0 1 50 85 Z"/></svg>
         <div class="card-header">
-            <span>AMBIENT TEMPERATURE</span>
-            <svg class="svg-icon" viewBox="0 0 64 64" fill="none"><rect x="24" y="8" width="16" height="34" rx="8" fill="rgba(255,255,255,0.2)" stroke="#ffffff" stroke-width="3"/><circle cx="32" cy="46" r="12" fill="#ffffff"/><path d="M32 28V46" stroke="#ef4444" stroke-width="6" stroke-linecap="round"/><circle cx="32" cy="46" r="6" fill="#ef4444"/></svg>
+            <div class="header-title">
+                <div class="icon-circle"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/></svg></div>
+                AMBIENT TEMPERATURE
+            </div>
+            <div class="badge" style="background:rgba(255,255,255,0.2);"><div class="status-dot"></div><span id="status-temp">Normal</span></div>
         </div>
-        <div class="value-wrapper">
-            <div><span id="val-temp" class="value">--</span><span class="unit">&deg;C</span></div>
+        <div class="hero-body">
+            <div><span id="val-temp" class="temp-main">--</span><span class="metric-unit"> &deg;C</span></div>
+            <div class="hero-chart-wrap"><canvas id="chart-temp" width="400" height="80"></canvas></div>
         </div>
-        <div id="temp-desc" class="sub-text" style="color:#ffffff; opacity: 0.95;">Monitoring thermal comfort...</div>
-        <div class="sparkline-box">
-            <canvas id="chart-temp" width="400" height="60"></canvas>
+        <div class="sub-text" style="color:var(--c-main); opacity:0.9;">Monitoring thermal comfort...</div>
+        <div class="stats-bar">
+            <div class="stat-item"><span style="color:#fef08a;">&#128200;</span> Feels Like <span id="val-feels">-- &deg;C</span></div>
+            <div class="stat-item"><span style="color:#bae6fd;">&#10052;</span> Min <span id="val-min">-- &deg;C</span></div>
+            <div class="stat-item"><span style="color:#fecaca;">&#128293;</span> Max <span id="val-max">-- &deg;C</span></div>
         </div>
     </div>
 
-    <div class="card card-large">
-        <svg class="bg-watermark" viewBox="0 0 100 100"><path d="M55 5 L25 55 H50 L45 95 L75 45 H50 Z" fill="currentColor"/></svg>
-        <div class="card-header">
-            <span>POWER & BATTERY STATUS</span>
-            <svg class="svg-icon" id="bat-icon" viewBox="0 0 64 64" fill="none"><rect x="8" y="18" width="44" height="28" rx="6" fill="#f0f9ff" stroke="#0284c7" stroke-width="3"/><path d="M56 26H58C59.1046 26 60 26.8954 60 28V36C60 37.1046 59.1046 38 58 38H56V26Z" fill="#0284c7"/></svg>
-        </div>
-        <div class="row-item">
-            <span style="color:var(--text-sub); font-weight:600;">Active Power Source:</span>
-            <strong id="val-power" style="color:var(--accent); font-size:1.15rem;">--</strong>
-        </div>
-        <div class="row-item">
-            <span style="color:var(--text-sub); font-weight:600;">Battery Level:</span>
-            <div style="display:flex; align-items:center; gap:12px;">
+    <div class="card span-6 t-bat">
+        <svg class="bg-watermark" style="fill:currentColor;" viewBox="0 0 100 100"><path d="M55 5 L25 55 H50 L45 95 L75 45 H50 Z"/></svg>
+        <div class="card-header"><div class="header-title"><div class="icon-circle"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 8h1a4 4 0 0 1 0 8h-1M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg></div>POWER & BATTERY STATUS</div></div>
+        <div class="split-card">
+            <div class="split-half">
                 <div>
-                    <strong id="val-bat-pct" style="font-size:1.25rem;">--</strong>
-                    <span id="val-bat-volts" style="color:var(--text-sub); font-size:0.95rem; font-weight:600; margin-left:4px;">(-- V)</span>
+                    <div class="power-label">Active Power Source</div>
+                    <div id="val-power" class="power-val">--</div>
+                    <div id="val-power-sub" class="sub-text" style="margin:0; font-size:0.8rem;">(Checking...)</div>
                 </div>
-                <div class="ring-container">
-                    <svg class="ring-svg" viewBox="0 0 64 64">
-                        <circle class="ring-track" cx="32" cy="32" r="26"/>
-                        <circle id="ring-bat-val" class="ring-val" cx="32" cy="32" r="26" stroke="#16a34a" stroke-dasharray="163.36" stroke-dashoffset="163.36"/>
-                    </svg>
-                    <svg class="ring-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                <div class="icon-circle" style="width:48px; height:48px;"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 8h1a4 4 0 0 1 0 8h-1M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/></svg></div>
+            </div>
+            <div class="split-divider"></div>
+            <div class="split-half">
+                <div>
+                    <div class="power-label">Battery Level</div>
+                    <div id="val-bat-pct" class="power-val">--</div>
+                    <div id="val-bat-volts" class="sub-text" style="margin:0; font-size:0.8rem;">(-- V)</div>
                 </div>
+                <div class="icon-circle" style="width:48px; height:48px; background:transparent; border:3px solid var(--c-icn);"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>
             </div>
         </div>
     </div>
 
-    <div class="card">
-        <svg class="bg-watermark" viewBox="0 0 100 100"><path d="M50 10 C50 10 20 45 20 65 C20 82 33 95 50 95 C67 95 80 82 80 65 C80 45 50 10 50 10 Z" fill="currentColor"/></svg>
-        <div class="card-header"><span>HUMIDITY</span></div>
-        <div class="value-wrapper">
-            <div><span id="val-hum" class="value">--</span><span class="unit">%</span></div>
-            <div class="ring-container">
-                <svg class="ring-svg" viewBox="0 0 64 64">
-                    <circle class="ring-track" cx="32" cy="32" r="26"/>
-                    <circle id="ring-hum-val" class="ring-val" cx="32" cy="32" r="26" stroke="#0284c7" stroke-dasharray="163.36" stroke-dashoffset="163.36"/>
-                </svg>
-                <svg class="ring-icon" viewBox="0 0 24 24" fill="#0284c7"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>
-            </div>
+    <div class="card span-2 t-hum">
+        <svg class="bg-watermark" style="fill:currentColor;" viewBox="0 0 100 100"><path d="M50 10 C50 10 20 45 20 65 C20 82 33 95 50 95 C67 95 80 82 80 65 C80 45 50 10 50 10 Z"/></svg>
+        <div class="card-header"><div class="header-title"><div class="icon-circle"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg></div>HUMIDITY</div></div>
+        <div><span id="val-hum" class="metric-val">--</span><span class="metric-unit"> %</span></div>
+        <div class="sub-text">Relative Moisture</div>
+        <div style="position:relative; width:100%; display:flex; justify-content:center; margin: 18px 0 8px 0;">
+            <svg viewBox="0 0 100 55" style="width:100%; max-width:160px; height:auto;">
+                <path d="M 15 50 A 35 35 0 0 1 85 50" fill="none" stroke="rgba(0,0,0,0.08)" stroke-width="8" stroke-linecap="round"/>
+                <path id="arch-val" d="M 15 50 A 35 35 0 0 1 85 50" fill="none" stroke="var(--c-icn)" stroke-width="8" stroke-linecap="round" stroke-dasharray="109.95" stroke-dashoffset="109.95" style="transition: stroke-dashoffset 0.8s ease-in-out;"/>
+            </svg>
+            <svg style="position:absolute; bottom:5px; width:22px; height:22px; color:var(--c-icn);" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>
         </div>
-        <div class="sub-text" style="color:var(--text-sub);">Relative Moisture</div>
+        <div class="badge"><div class="status-dot"></div><span id="status-hum">Comfortable</span></div>
     </div>
 
-    <div class="card">
-        <svg class="bg-watermark" viewBox="0 0 100 100"><circle cx="50" cy="50" r="20" fill="currentColor"/><path d="M50 5V20M50 80V95M5 50H20M80 50H95M18 18L29 29M71 71L82 82M18 82L29 71M71 29L82 18" stroke="currentColor" stroke-width="8" stroke-linecap="round"/></svg>
-        <div class="card-header">
-            <span>LIGHT INTENSITY</span>
-            <svg class="svg-icon" viewBox="0 0 64 64" fill="none"><circle cx="32" cy="32" r="14" fill="#fef9c3" stroke="#ca8a04" stroke-width="3"/><path d="M32 6V12M32 52V58M6 32H12M52 32H58M13.6 13.6L17.8 17.8M46.2 46.2L50.4 50.4M13.6 50.4L17.8 46.2M46.2 17.8L50.4 13.6" stroke="#ca8a04" stroke-width="3" stroke-linecap="round"/></svg>
-        </div>
-        <div class="value-wrapper"><div><span id="val-light" class="value">--</span><span class="unit">lx</span></div></div>
-        <div id="val-light-type" class="sub-text" style="color:var(--warn); font-weight:800;">Evaluating...</div>
+    <div class="card span-2 t-lgt">
+        <svg class="bg-watermark" style="fill:none; stroke:currentColor;" viewBox="0 0 100 100"><circle cx="50" cy="50" r="20" stroke-width="6"/><path d="M50 5V20M50 80V95M5 50H20M80 50H95M18 18L29 29M71 71L82 82M18 82L29 71M71 29L82 18" stroke-width="8" stroke-linecap="round"/></svg>
+        <div class="card-header"><div class="header-title"><div class="icon-circle"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg></div>LIGHT INTENSITY</div></div>
+        <div><span id="val-light" class="metric-val">--</span><span class="metric-unit"> lx</span></div>
+        <div class="sub-text">Illuminance</div>
+        <div class="sparkline-box"><canvas id="chart-light" width="200" height="50"></canvas></div>
+        <div class="badge"><div class="status-dot"></div><span id="status-light">Bright</span></div>
     </div>
 
-    <div class="card card-large">
-        <svg class="bg-watermark" viewBox="0 0 100 100"><path d="M10 30 H70 C80 30 85 20 75 10 C65 0 55 15 65 25 M10 60 H80 C90 60 95 70 85 80 C75 90 65 75 75 65 M10 85 H50" fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="round"/></svg>
-        <div class="card-header">
-            <span>INDOOR AIR & SMOKE MONITOR (MQ135)</span>
-            <svg class="svg-icon" viewBox="0 0 64 64" fill="none"><path d="M48 40H18C13.5817 40 10 36.4183 10 32C10 27.5817 13.5817 24 18 24C19.123 24 20.192 24.2312 21.1613 24.6483C22.686 20.2323 26.9691 17 32 17C38.0751 17 43 21.9249 43 28C43 28.3353 42.985 28.6672 42.9555 28.9951C47.4695 29.671 51 33.558 51 38.25C51 43.0825 47.0825 47 42.25 47H36" stroke="#64748b" stroke-width="3" stroke-linecap="round"/><path d="M24 48C24 48 26 53 30 53C34 53 34 47 38 47C42 47 42 53 42 53" stroke="#16a34a" stroke-width="3" stroke-linecap="round"/></svg>
-        </div>
-        <div class="row-item">
-            <div>
-                <span style="color:var(--text-sub); display:block; font-size:0.85rem; font-weight:600;">Gas / Smoke Status:</span>
-                <strong id="val-smoke-status" style="font-size:1.45rem; color:var(--good);">--</strong>
-            </div>
-            <div style="text-align:right;">
-                <span style="color:var(--text-sub); display:block; font-size:0.85rem; font-weight:600;">Raw Index Value:</span>
-                <span id="val-gas-idx" style="font-weight:800; font-size:1.25rem;">--</span>
-            </div>
-        </div>
-        <div class="sparkline-box" style="height:40px; margin-top:8px;">
-            <canvas id="chart-smoke" width="400" height="50"></canvas>
-        </div>
+    <div class="card span-2 t-prs">
+        <svg class="bg-watermark" style="fill:none; stroke:currentColor;" viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" stroke-width="6"/><path d="M50 50 L75 25 M30 70 L20 80 M70 70 L80 80" stroke-width="6" stroke-linecap="round"/><circle cx="50" cy="50" r="8" fill="currentColor"/></svg>
+        <div class="card-header"><div class="header-title"><div class="icon-circle"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div>PRESSURE</div></div>
+        <div><span id="val-pres" class="metric-val">--</span><span class="metric-unit"> hPa</span></div>
+        <div class="sub-text">Atmospheric Pressure</div>
+        <div class="sparkline-box"><canvas id="chart-pres" width="200" height="50"></canvas></div>
+        <div class="badge"><div class="status-dot"></div><span id="status-pres">Normal</span></div>
     </div>
 
-    <div class="card card-large">
-        <svg class="bg-watermark" viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="none" stroke="currentColor" stroke-width="6"/><path d="M50 50 L75 25 M30 70 L20 80 M70 70 L80 80" stroke="currentColor" stroke-width="6" stroke-linecap="round"/><circle cx="50" cy="50" r="8" fill="currentColor"/></svg>
-        <div class="card-header">
-            <span>BAROMETRIC PRESSURE & SYSTEM</span>
-            <svg class="svg-icon" viewBox="0 0 64 64" fill="none"><circle cx="32" cy="32" r="22" fill="#e0f2fe" stroke="#0284c7" stroke-width="3"/><path d="M32 32L44 20" stroke="#dc2626" stroke-width="4" stroke-linecap="round"/><circle cx="32" cy="32" r="4" fill="#dc2626"/></svg>
-        </div>
-        <div class="row-item">
-            <span style="color:var(--text-sub); font-weight:600;">Barometric Pressure:</span>
-            <div><strong id="val-pres" style="font-size:1.25rem;">--</strong> <span class="unit">hPa</span></div>
-        </div>
-        <div class="row-item">
-            <span style="color:var(--text-sub); font-weight:600;">System Alarm State:</span>
-            <strong id="val-sys" style="font-size:1.15rem; color:var(--good);">--</strong>
-        </div>
+    <div class="card span-3 card-dew t-dew">
+        <svg class="bg-watermark" style="fill:none; stroke:currentColor;" viewBox="0 0 100 100"><path d="M30 65 A 20 20 0 0 1 40 30 A 25 25 0 0 1 80 45 A 15 15 0 0 1 80 75 H 30 Z" stroke-width="6" stroke-linecap="round"/></svg>
+        <div class="card-header"><div class="header-title"><div class="icon-circle"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg></div>DEW POINT & SYSTEM</div></div>
+        <div><span id="val-dew" class="metric-val">--</span><span class="metric-unit"> &deg;C</span></div>
+        <div class="sub-text">Condensation Threshold</div>
+        <div class="sparkline-box"><canvas id="chart-dew" width="200" height="50"></canvas></div>
+        <div class="badge"><div class="status-dot"></div><span id="status-sys">System Normal</span></div>
     </div>
 
-    <div class="btn-group">
-        <button onclick="openModal('mod-dev')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg> Device Info</button>
-        <button onclick="openModal('mod-sens')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg> Diagnostics</button>
-    </div>
-
-    <div class="footer-info">
-        <div>Connected Clients: <strong id="val-clients" style="color:var(--text-main);">--</strong></div>
-        <div>Last Sync: <strong id="val-time" style="color:var(--text-main);">Never</strong></div>
+    <div class="card span-3 card-mq t-smk">
+        <svg class="bg-watermark" style="fill:none; stroke:currentColor;" viewBox="0 0 100 100"><path d="M10 30 H70 C80 30 85 20 75 10 C65 0 55 15 65 25 M10 60 H80 C90 60 95 70 85 80 C75 90 65 75 75 65 M10 85 H50" stroke-width="6" stroke-linecap="round"/></svg>
+        <div class="card-header"><div class="header-title"><div class="icon-circle"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 8h1a4 4 0 0 1 0 8h-1M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/></svg></div>INDOOR AIR & SMOKE (MQ135)</div></div>
+        <div><span id="val-gas-idx" class="metric-val">--</span><span class="metric-unit"> Index</span></div>
+        <div class="sub-text">Raw MOS Resistance Ratio</div>
+        <div class="aqi-bar-container">
+            <div class="aqi-bar"><div id="aqi-thumb" class="aqi-thumb"></div></div>
+        </div>
+        <div class="badge"><div class="status-dot"></div><span id="status-smoke">Clean Air (No Smoke)</span></div>
     </div>
 </div>
 
-<div id="mod-dev" class="modal"><div class="modal-content"><div class="modal-header"><span>Device Specs</span><span class="close" onclick="closeModal('mod-dev')">&times;</span></div><div class="list-item"><span>Board:</span><strong id="dev-board">--</strong></div><div class="list-item"><span>Firmware:</span><strong id="dev-fw">--</strong></div><div class="list-item"><span>IP Address:</span><strong id="dev-ip">--</strong></div><div class="list-item"><span>WiFi SSID:</span><strong id="dev-ssid">--</strong></div><div class="list-item"><span>Uptime:</span><strong id="dev-up">--</strong></div></div></div>
-<div id="mod-sens" class="modal"><div class="modal-content"><div class="modal-header"><span>Hardware Buses</span><span class="close" onclick="closeModal('mod-sens')">&times;</span></div><div class="list-item"><span>DHT22 (Temp/Hum):</span><span id="st-dht" class="tag">--</span></div><div class="list-item"><span>BMP280 (Pressure):</span><span id="st-bmp" class="tag">--</span></div><div class="list-item"><span>BH1750 (Light):</span><span id="st-bh" class="tag">--</span></div><div class="list-item"><span>MQ135 (Gas/Smoke):</span><span id="st-mq" class="tag">--</span></div></div></div>
+<div class="btn-row">
+    <button onclick="openModal('mod-dev')">&#128187; Device Specs</button>
+    <button onclick="openModal('mod-sens')">&#128269; Hardware Diagnostics</button>
+</div>
+
+<footer>
+    <div>&#128338; Last Updated: <span id="val-time">Never</span></div>
+    <div>&#128260; Auto Refresh ON (1s) | Connected Clients: <strong id="val-clients" style="color:var(--text-main);">--</strong></div>
+</footer>
+
+<div id="mod-dev" class="modal"><div class="modal-content"><div class="modal-header"><span>Device Specs</span><span class="close" onclick="closeModal('mod-dev')">&times;</span></div><div class="list-item"><span>Board:</span><strong id="dev-board">--</strong></div><div class="list-item"><span>Firmware:</span><strong id="dev-fw">--</strong></div><div class="list-item"><span>mDNS Host:</span><strong>http://weather.local</strong></div><div class="list-item"><span>IP Address:</span><strong id="dev-ip">--</strong></div><div class="list-item"><span>Uptime:</span><strong id="dev-up">--</strong></div></div></div>
+<div id="mod-sens" class="modal"><div class="modal-content"><div class="modal-header"><span>Hardware Buses</span><span class="close" onclick="closeModal('mod-sens')">&times;</span></div><div class="list-item"><span>DHT22 (Temp/Hum):</span><span id="st-dht">--</span></div><div class="list-item"><span>BMP280 (Pressure):</span><span id="st-bmp">--</span></div><div class="list-item"><span>BH1750 (Light):</span><span id="st-bh">--</span></div><div class="list-item"><span>MQ135 (Smoke):</span><span id="st-mq">--</span></div></div></div>
 
 <script>
     function openModal(id) { document.getElementById(id).style.display = 'flex'; }
     function closeModal(id) { document.getElementById(id).style.display = 'none'; }
     window.onclick = function(e) { if (e.target.className === 'modal') e.target.style.display = 'none'; }
-    function setTag(id, ok) { let el = document.getElementById(id); el.textContent = ok ? "OK" : "NOT FOUND"; el.className = ok ? "tag tag-ok" : "tag tag-err"; }
 
-    // --- SPARKLINE CHARTS ARRAY & DRAW LOGIC ---
-    let historyTemp = [];
-    let historySmoke = [];
-    const MAX_POINTS = 30;
+    let histTemp = [], histLight = [], histPres = [], histDew = [];
+    let minTemp = Infinity, maxTemp = -Infinity;
+    const MAX_PTS = 25;
 
-    function drawSparkline(canvasId, data, lineColor, fillGradTop) {
-        let canvas = document.getElementById(canvasId);
-        if (!canvas) return;
-        let ctx = canvas.getContext('2d');
-        let w = canvas.width; let h = canvas.height;
-        ctx.clearRect(0, 0, w, h);
-        if (data.length < 2) return;
-
-        let min = Math.min(...data); let max = Math.max(...data);
+    function drawSmoothSparkline(id, data, color, gradTop) {
+        let canvas = document.getElementById(id); if (!canvas) return;
+        let ctx = canvas.getContext('2d'); let w = canvas.width; let h = canvas.height;
+        ctx.clearRect(0, 0, w, h); if (data.length < 2) return;
+        let min = Math.min(...data), max = Math.max(...data);
         if (min === max) { min -= 1; max += 1; }
-        let range = max - min;
-        let step = w / (MAX_POINTS - 1);
-
-        ctx.beginPath();
-        for (let i = 0; i < data.length; i++) {
-            let x = i * step;
-            let y = h - ((data[i] - min) / range) * (h - 10) - 5;
-            if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+        let step = w / (data.length - 1);
+        let pts = data.map((val, i) => ({ x: i * step, y: h - ((val - min) / (max - min)) * (h - 14) - 7 }));
+        
+        ctx.beginPath(); ctx.moveTo(pts[0].x, pts[0].y);
+        for (let i = 0; i < pts.length - 1; i++) {
+            let x_mid = (pts[i].x + pts[i+1].x) / 2, y_mid = (pts[i].y + pts[i+1].y) / 2;
+            ctx.quadraticCurveTo(pts[i].x, pts[i].y, x_mid, y_mid);
         }
-        ctx.strokeStyle = lineColor;
-        ctx.lineWidth = 3;
-        ctx.stroke();
-
-        // Gradient under line
-        ctx.lineTo((data.length - 1) * step, h); ctx.lineTo(0, h); ctx.closePath();
+        ctx.lineTo(pts[pts.length-1].x, pts[pts.length-1].y);
+        ctx.strokeStyle = color; ctx.lineWidth = 3; ctx.stroke();
+        
+        ctx.lineTo(pts[pts.length-1].x, h); ctx.lineTo(0, h); ctx.closePath();
         let grad = ctx.createLinearGradient(0, 0, 0, h);
-        grad.addColorStop(0, fillGradTop); grad.addColorStop(1, 'rgba(255,255,255,0)');
+        grad.addColorStop(0, gradTop); grad.addColorStop(1, 'rgba(255,255,255,0)');
         ctx.fillStyle = grad; ctx.fill();
-    }
-
-    // --- CIRCULAR RING PROGRESS LOGIC ---
-    function setRingProgress(ringId, percent, strokeColor) {
-        let ring = document.getElementById(ringId);
-        if (!ring) return;
-        let radius = 26; let circ = 2 * Math.PI * radius; // ~163.36
-        let p = Math.max(0, Math.min(percent, 100));
-        let offset = circ - (p / 100) * circ;
-        ring.style.strokeDashoffset = offset;
-        if (strokeColor) ring.style.stroke = strokeColor;
     }
 
     function fetchData() {
@@ -303,79 +288,88 @@ const char INDEX_HTML[] PROGMEM = R"rawliteral(
                 let badge = document.getElementById('connection-status');
                 let txt = document.getElementById('conn-text');
                 if (this.status === 200) {
-                    badge.classList.remove('offline');
-                    txt.textContent = "ONLINE";
+                    badge.classList.remove('offline'); txt.textContent = "ONLINE";
                     let d = JSON.parse(this.responseText);
                     
+                    let t = parseFloat(d.temperature); let h = parseFloat(d.humidity);
                     document.getElementById('val-temp').textContent = d.temperature;
                     document.getElementById('val-hum').textContent = d.humidity;
                     document.getElementById('val-pres').textContent = d.pressure;
                     document.getElementById('val-light').textContent = d.light;
-                    document.getElementById('val-light-type').textContent = d.lightType;
                     document.getElementById('val-gas-idx').textContent = d.gasIndex;
-                    document.getElementById('val-smoke-status').textContent = d.smokeStatus;
-                    document.getElementById('val-sys').textContent = d.systemStatus;
                     document.getElementById('val-clients').textContent = d.clients;
                     document.getElementById('val-time').textContent = new Date().toLocaleTimeString();
                     
-                    // Update Sparklines
-                    if (d.dht && !isNaN(parseFloat(d.temperature))) {
-                        historyTemp.push(parseFloat(d.temperature));
-                        if (historyTemp.length > MAX_POINTS) historyTemp.shift();
-                        drawSparkline('chart-temp', historyTemp, '#ffffff', 'rgba(255,255,255,0.4)');
-                    }
-                    if (d.mq135 && !isNaN(parseInt(d.gasIndex))) {
-                        historySmoke.push(parseInt(d.gasIndex));
-                        if (historySmoke.length > MAX_POINTS) historySmoke.shift();
-                        drawSparkline('chart-smoke', historySmoke, '#0284c7', 'rgba(2,132,199,0.3)');
+                    if (!isNaN(t) && !isNaN(h)) {
+                        minTemp = Math.min(minTemp, t); maxTemp = Math.max(maxTemp, t);
+                        document.getElementById('val-min').textContent = minTemp.toFixed(1) + " °C";
+                        document.getElementById('val-max').textContent = maxTemp.toFixed(1) + " °C";
+                        
+                        let gamma = (17.27 * t) / (237.7 + t) + Math.log(h / 100.0);
+                        let dew = (237.7 * gamma) / (17.27 - gamma);
+                        document.getElementById('val-dew').textContent = dew.toFixed(1);
+                        
+                        let feels = t + 0.05 * h - 2.5;
+                        document.getElementById('val-feels').textContent = (t > 22 ? feels : t).toFixed(1) + " °C";
+
+                        histTemp.push(t); if (histTemp.length > MAX_PTS) histTemp.shift();
+                        drawSmoothSparkline('chart-temp', histTemp, '#ffffff', 'rgba(255, 255, 255, 0.25)');
+                        
+                        histDew.push(dew); if (histDew.length > MAX_PTS) histDew.shift();
+                        drawSmoothSparkline('chart-dew', histDew, '#0d9488', 'rgba(13, 148, 136, 0.2)');
+
+                        let archOffset = 109.95 - (Math.min(100, h) / 100.0) * 109.95;
+                        document.getElementById('arch-val').style.strokeDashoffset = archOffset;
                     }
 
-                    // Update Humidity Ring
-                    if (d.dht && !isNaN(parseFloat(d.humidity))) {
-                        setRingProgress('ring-hum-val', parseFloat(d.humidity), '#0284c7');
+                    if (!isNaN(parseFloat(d.light))) {
+                        histLight.push(parseFloat(d.light)); if (histLight.length > MAX_PTS) histLight.shift();
+                        drawSmoothSparkline('chart-light', histLight, '#ca8a04', 'rgba(202, 138, 4, 0.2)');
+                    }
+                    if (!isNaN(parseFloat(d.pressure))) {
+                        histPres.push(parseFloat(d.pressure)); if (histPres.length > MAX_PTS) histPres.shift();
+                        drawSmoothSparkline('chart-pres', histPres, '#9333ea', 'rgba(147, 51, 234, 0.2)');
                     }
 
-                    // Update Battery Ring & Power
-                    document.getElementById('val-power').textContent = d.powerSource;
-                    if (d.batteryPct >= 0) {
-                        document.getElementById('val-bat-pct').textContent = d.batteryPct + "%";
-                        document.getElementById('val-bat-volts').textContent = "(" + d.batteryVolts + " V)";
-                        let batColor = d.batteryPct > 20 ? "#16a34a" : "#dc2626";
-                        setRingProgress('ring-bat-val', d.batteryPct, batColor);
-                    } else {
-                        document.getElementById('val-bat-pct').textContent = "No Bat";
-                        document.getElementById('val-bat-volts').textContent = "(USB)";
-                        setRingProgress('ring-bat-val', 100, '#0284c7');
+                    document.getElementById('val-power').textContent = d.powerSource.split(' ')[0] + " Power";
+                    document.getElementById('val-power-sub').textContent = d.batteryPct >= 0 ? "(Battery Active)" : "(No Battery Connected)";
+                    document.getElementById('val-bat-pct').textContent = d.batteryPct >= 0 ? d.batteryPct + "%" : "No Battery";
+                    document.getElementById('val-bat-volts').textContent = d.batteryPct >= 0 ? "(" + d.batteryVolts + " V)" : "(USB Bus Powered)";
+
+                    let idx = parseInt(d.gasIndex);
+                    if (!isNaN(idx)) {
+                        let pct = Math.min(100, Math.max(0, (idx / 400.0) * 100));
+                        document.getElementById('aqi-thumb').style.left = `calc(${pct}% - 8px)`;
                     }
-                    
-                    // Smoke status text styling
-                    let smkEl = document.getElementById('val-smoke-status');
-                    if (d.smokeStatus.includes("Clean")) smkEl.style.color = "var(--good)";
-                    else if (d.smokeStatus.includes("Normal")) smkEl.style.color = "var(--warn)";
-                    else smkEl.style.color = "var(--emerg)";
+
+                    document.getElementById('status-smoke').textContent = d.smokeStatus;
+                    document.getElementById('status-light').textContent = d.lightType.split('/')[0];
+                    document.getElementById('status-sys').textContent = d.systemStatus.split('(')[0];
 
                     document.getElementById('dev-board').textContent = d.board;
                     document.getElementById('dev-fw').textContent = d.fw;
                     document.getElementById('dev-ip').textContent = d.ip;
-                    document.getElementById('dev-ssid').textContent = d.ssid;
                     document.getElementById('dev-up').textContent = d.uptime;
                     
-                    setTag('st-dht', d.dht);
-                    setTag('st-bmp', d.bmp);
-                    setTag('st-bh', d.bh1750);
-                    setTag('st-mq', d.mq135);
+                    document.getElementById('st-dht').innerHTML = d.dht ? "OK" : "<span style='color:#dc2626;'>ERR</span>";
+                    document.getElementById('st-bmp').innerHTML = d.bmp ? "OK" : "<span style='color:#dc2626;'>ERR</span>";
+                    document.getElementById('st-bh').innerHTML = d.bh1750 ? "OK" : "<span style='color:#dc2626;'>ERR</span>";
+                    document.getElementById('st-mq').innerHTML = d.mq135 ? "OK" : "<span style='color:#dc2626;'>ERR</span>";
+                    
+                    let sensList = document.getElementById('mod-sens').querySelector('.modal-content');
+                    if(!document.getElementById('st-core')) {
+                        sensList.innerHTML += `<div class="list-item"><span>ESP32 Core Heat:</span><strong id="st-core">--</strong></div>`;
+                    }
+                    document.getElementById('st-core').innerHTML = d.coreTemp > 55.0 ? `<span style='color:#dc2626;'>${d.coreTemp} °C (HOT)</span>` : `${d.coreTemp} °C`;
+
                 } else {
-                    badge.classList.add('offline');
-                    txt.textContent = "OFFLINE";
+                    badge.classList.add('offline'); txt.textContent = "OFFLINE";
                 }
             }
         };
-        xhr.open("GET", "/data", true);
-        xhr.timeout = 800;
-        xhr.send();
+        xhr.open("GET", "/data", true); xhr.timeout = 800; xhr.send();
     }
-    setInterval(fetchData, 1000);
-    fetchData();
+    setInterval(fetchData, 1000); fetchData();
 </script>
 </body>
 </html>
